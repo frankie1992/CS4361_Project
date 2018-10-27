@@ -19,7 +19,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void create () {
 		Box2D.init();
 		batch = new SpriteBatch();
-		img = new Texture("still_ship.gif");
+		img = new Texture("still_shipt6.gif");
 		camera = new OrthographicCamera();
 		viewport = new ExtendViewport(800, 600, camera);
 
