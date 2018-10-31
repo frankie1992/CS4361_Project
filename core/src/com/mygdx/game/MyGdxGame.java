@@ -13,11 +13,11 @@ import com.mygdx.game.WrapEffect;
 
 public class MyGdxGame extends ApplicationAdapter {
 	SpriteBatch batch;
-	Texture playerModel, asteroidModel;
-	Sprite playerSprite, asteroidSprite;
+	Texture playerModel;
+	Sprite playerSprite;
 	PlayerInput input;
 	WrapEffect wrapScreen;
-	AsteroidSpawner asteroid;
+	AsteroidSpawner spawner;
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
@@ -29,26 +29,26 @@ public class MyGdxGame extends ApplicationAdapter {
 		wrapScreen = new WrapEffect();
 
 		//Asteroid:
-		asteroidModel = new Texture("Asteroids/Asteroid(Test).png");
-		asteroidSprite = new Sprite(asteroidModel);
-		asteroidSprite.setPosition(10,10);
-		asteroidSprite.setOrigin(asteroidSprite.getWidth()/2, asteroidSprite.getHeight()/2);
-		asteroid = new AsteroidSpawner();
-		asteroid.spawn(asteroidSprite);
+		spawner = new AsteroidSpawner("Asteroids/Asteroid(Test).png");
+
 
 	}
 
 	@Override
 	public void render () {
+		spawner.spawn();
 		input.keyInput(playerSprite);
 		wrapScreen.wrapScreen(playerSprite);
-		asteroid.move();
-		wrapScreen.wrapScreen(asteroidSprite);
+		spawner.moveAll();
+		wrapScreen.wrapScreen(spawner.asteroidArray[0].sprite);
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 		playerSprite.draw(batch);
-		asteroidSprite.draw(batch);
+		//spawner.asteroidArray[0].sprite.draw(batch);
+		for(int i = 0; i < spawner.asteroidCount; i++) { //Draw each asteroid currently spawned
+			spawner.asteroidArray[i].sprite.draw(batch);
+		}
 		batch.end();
 
 	}
@@ -58,7 +58,6 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void dispose () {
 		batch.dispose();
 		playerModel.dispose();
-		asteroidModel.dispose();
-
+		//asteroid.dispose();
 	}
 }
