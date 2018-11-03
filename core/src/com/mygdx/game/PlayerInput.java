@@ -2,13 +2,15 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import java.util.Random;
+
 
 public class PlayerInput {
     Random randNumber;
 
-    public  void keyInput( Sprite playerSprite)
+    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture)
     {
         randNumber = new Random();
 
@@ -57,8 +59,13 @@ public class PlayerInput {
             playerSprite.setY(randPosY);
         }
 
+        // shot a bullet
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
+        {
+            Bullet bullet = new Bullet(playerSprite.getX(),playerSprite.getY(),8, playerSprite.getRotation(), bulletTexture);
+            return bullet;
+        }
 
-
-
+        return null;
     }
 }
