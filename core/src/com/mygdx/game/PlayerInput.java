@@ -62,7 +62,7 @@ public class PlayerInput {
         // shot a bullet
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
         {
-            Bullet bullet = new Bullet(playerSprite.getX(),playerSprite.getY(),8, playerSprite.getRotation(), bulletTexture);
+            Bullet bullet = new Bullet(playerSprite.getX(),playerSprite.getY(),8,(float)Math.toRadians(playerSprite.getRotation()), bulletTexture);
             return bullet;
         }
 
