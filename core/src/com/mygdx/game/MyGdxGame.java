@@ -37,9 +37,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		wrapScreen = new WrapEffect();
 
 		//Asteroid:
-		spawner = new AsteroidSpawner("Asteroids/Asteroid(Test).png");
-
-
+		spawner = new AsteroidSpawner("Asteroids/Asteroid(Test).png", "Asteroids/AsteroidSmall(Test).png");
+		//spawner.spawn();
 	}
 
 	@Override
@@ -49,6 +48,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		if(bullet != null){
 			bullets.add(bullet);
 		}
+
 		wrapScreen.wrapScreen(playerSprite);
 		spawner.moveAll();
 		Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -64,7 +64,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		}
 		bullets.removeAll(deletebullets);
-		for(int i = 0; i < spawner.asteroidCount; i++) { //Draw each asteroid currently spawned
+		for(int i = 0; i < spawner.asteroidCount(); i++) { //Draw each asteroid currently spawned
 			spawner.getAsteroid(i).sprite.draw(batch);
 		}
 		batch.end();
@@ -75,6 +75,5 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void dispose () {
 		batch.dispose();
 		playerModel.dispose();
-		//asteroid.dispose();
 	}
 }

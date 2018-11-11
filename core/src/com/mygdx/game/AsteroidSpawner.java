@@ -11,38 +11,37 @@ import java.util.List;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
     Random rand;
-    int asteroidCount=0;
+    //int asteroidCount=0;
     int max = 3; //maximum amount of asteroids that will be spawned
-    Texture[] models = new Texture[1]; //Array of possible textures to use for spawned asteroids
+    Texture[] models = new Texture[2]; //Array of possible textures to use for spawned asteroids
     Asteroid[] asteroidArray = new Asteroid[max];
     List<Asteroid> asteroids = new ArrayList<>();
 
 
-    AsteroidSpawner(String path) { //Internal path for texture given
-        for (int i = 0; i < models.length; i++) { //
-            models[i] = new Texture(path);
-        }
+    AsteroidSpawner(String m1, String m2) { //Internal path for texture given
+        models[0] = new Texture(m1);
+        models[1] = new Texture(m2);
     }
 
     public void spawn() { //Spawns asteroid with random rotation
-        if (asteroidCount < max) {
+        if (asteroidCount() < max) {
             rand = new Random();
             float speed = (rand.nextFloat() * 3) + 1;   //speed is random float between 1 and 4
             float rotation = rand.nextFloat() * 360;    //direction asteroid will move
-            float translateX = (float) (speed * Math.cos(Math.toRadians(rotation))); //Set velocity
-            float translateY = (float) (speed * Math.sin(Math.toRadians(rotation)));
+            float translateX = (float) (Math.cos(Math.toRadians(rotation))); //Set velocity
+            float translateY = (float) (Math.sin(Math.toRadians(rotation)));
             //asteroidArray[asteroidCount] = new Asteroid(models[0], speed, translateX, translateY, rotation);
-            asteroids.add(new Asteroid(models[0], speed, translateX, translateY, rotation));
-            asteroidCount++;
+            asteroids.add(new Asteroid(models, speed, translateX, translateY, rotation));
+            //asteroidCount++;
         }
     }
 
     public void moveAll() { //Moves asteroid in set direction after spawning
-//        for(int i = 0; i < asteroidCount; i++) {
-//            asteroidArray[i].move();
-//        }
-        for(int i = 0; i < asteroidCount; i++) {
+        for(int i = 0; i < asteroidCount(); i++) {
             getAsteroid(i).move();
+            if(Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
+                getAsteroid(i).destroyFrom(asteroids);
+            }
         }
     }
 
@@ -56,35 +55,45 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
             return null;
         }
     }
+
+    public int asteroidCount() {return asteroids.size();}
 }
 
 class Asteroid {
     float speed, translateX, translateY;;
 
-    //Texture model;
+    Texture bigAsteroid;
+    Texture smallAsteroid;
     Sprite sprite;
-    int size = 3; //Default size of asteroid
+    int size; //Default size of asteroid
 
-    private Asteroid(int si, Texture t, float s, float x, float y, float angle) { //Set size when spawning asteroid
-        this(t, s, x, y, angle);
-        size = si;
-        System.out.println("Asteroid Size = " + size);
+
+
+    public Asteroid(Texture[] t, float sp, float x, float y, float angle) { //Spawn asteroid with default size
+        this(2, t, sp, x, y, angle);
     }
 
-    public Asteroid(Texture t, float s, float x, float y, float angle) { //Spawn asteroid with default size
-        //Set Attributes
-        //asteroidModel = t;
-        sprite = new Sprite(t); //Sprite is spawned in game with given texture
-        speed = s;
-        translateX = x;
-        translateY = y;
+    public Asteroid(int si, Texture[] t, float sp, float x, float y, float angle) { //Asteroid size is small if spawned by split
+        size = si;
+        bigAsteroid = t[0];
+        smallAsteroid = t[1];
+        if (size == 2) { //Default size for initial spawn
+            sprite = new Sprite(bigAsteroid);
+        }
+        else if (size == 1) { //Size after splitting
+            System.out.println("NEW SMALL ASTEROID");
+            sprite = new Sprite(smallAsteroid);
+        }
+        else System.out.println("ERROR: Can't spawn asteroid! (size = " + size + ")");
+        speed = sp;
+        translateX = speed * x;
+        translateY = speed * y;
 
         //Set spawn conditions
         sprite.rotate(angle);
         sprite.setPosition(10,10);
         sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
     }
-
 
     public void move() {
         sprite.translate(translateX, translateY);
@@ -121,9 +130,21 @@ class Asteroid {
 
     }
 
-    public void split() { //Split asteroid when hit
+    public void destroyFrom(List<Asteroid> asteroids) { //When hit, asteroid is removed from list
+        if(size-1 == 0) {
+            asteroids.remove(this);//Remove asteroid
+            //System.out.println("Asteroid Destroyed");
+        }
+        else //if asteroid can be split
+        split(asteroids);
+    }
+
+    public void split(List<Asteroid> asteroids) { //Split asteroid when hit
         if (size > 0) {
-            //Spawn new asteroid
+            Texture[] t = {bigAsteroid, smallAsteroid};
+            asteroids.add(new Asteroid((size-1),t, speed*1.2f, translateX*-1,translateY*1, 1));
+            asteroids.add(new Asteroid((size-1),t, speed*1.2f, translateX*1,translateY*-1, 1));
+            asteroids.remove(this);
         }
     }
 }
