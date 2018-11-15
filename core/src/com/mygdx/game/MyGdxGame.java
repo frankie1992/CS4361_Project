@@ -29,6 +29,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 		playerModel = new Texture("Player/shipTest.png");
+
 		bulletModel = new Texture("Laser/Bullet.png");
 		playerSprite = new Sprite(playerModel);
 		playerSprite.setPosition(Gdx.graphics.getWidth() / 2 - playerSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - playerSprite.getHeight()/2);
@@ -45,6 +46,9 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void render () {
 		spawner.spawn();
 		bullet = input.keyInput(playerSprite, bulletModel);
+
+		playerSprite.setBounds();
+		
 		if(bullet != null){
 			bullets.add(bullet);
 		}

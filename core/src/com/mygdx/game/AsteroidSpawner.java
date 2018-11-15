@@ -93,6 +93,8 @@ class Asteroid {
         sprite.rotate(angle);
         sprite.setPosition(10,10);
         sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
+
+        sprite.setBounds();
     }
 
     public void move() {
