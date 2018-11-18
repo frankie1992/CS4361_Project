@@ -44,7 +44,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		spawner.spawn();
+		spawner.trySpawn();
 		bullet = input.keyInput(playerSprite, bulletModel);
 
 		playerSprite.setBounds();
