@@ -38,7 +38,10 @@ public class MyGdxGame extends ApplicationAdapter {
 		wrapScreen = new WrapEffect();
 
 		//Asteroid:
-		spawner = new AsteroidSpawner("Asteroids/Asteroid(Test).png", "Asteroids/AsteroidSmall(Test).png");
+		String[] bigAsteroid = {"Asteroids/Big/Asteroid_Big1.png", "Asteroids/Big/Asteroid_Big2.png"};
+		String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png","Asteroids/Med/Asteroid_Med2.png"};
+		String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png","Asteroids/Small/Asteroid_Small2.png"};
+		spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid);
 		//spawner.spawn();
 	}
 
@@ -47,7 +50,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		spawner.trySpawn();
 		bullet = input.keyInput(playerSprite, bulletModel);
 
-		playerSprite.setBounds();
+		//playerSprite.setBounds();
 		
 		if(bullet != null){
 			bullets.add(bullet);

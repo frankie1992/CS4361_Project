@@ -26,7 +26,7 @@ public class Bullet {
         bulletSprite.setPosition(x,y);
         bulletSprite.setOrigin(bulletSprite.getWidth()/2, bulletSprite.getHeight()/2);
 
-        bulletSprite.setBounds();
+        //bulletSprite.setBounds();
 
     }
 
