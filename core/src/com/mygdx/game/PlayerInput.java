@@ -4,13 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.audio.Sound;
 import java.util.Random;
 
 
 public class PlayerInput {
     Random randNumber;
-
-    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture)
+    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture, Sound laserSound, Sound shipSound)
     {
         randNumber = new Random();
 
@@ -33,6 +33,9 @@ public class PlayerInput {
         // Move Foward Button
         if (Gdx.input.isKeyPressed(Input.Keys.UP))
         {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.UP)){
+                shipSound.play();
+            }
             // Speed Button
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))
             {
@@ -63,6 +66,7 @@ public class PlayerInput {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
         {
             Bullet bullet = new Bullet(playerSprite.getX(),playerSprite.getY(),8,(float)Math.toRadians(playerSprite.getRotation()), bulletTexture);
+            laserSound.play();
             return bullet;
         }
 

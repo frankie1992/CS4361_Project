@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,13 +25,16 @@ public class MyGdxGame extends ApplicationAdapter {
 	Bullet bullet;
 	List<Bullet> bullets = new ArrayList<>();
 	List<Bullet> deletebullets = new ArrayList<>();
+	Sound laserSound;
+	Sound shipSound;
 
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		playerModel = new Texture("Player/shipTest.png");
-
+		shipSound = Gdx.audio.newSound(Gdx.files.internal("Player/ship_move2.wav"));
 		bulletModel = new Texture("Laser/Bullet.png");
+		laserSound = Gdx.audio.newSound(Gdx.files.internal("Laser/laser_sound2.wav"));
 		playerSprite = new Sprite(playerModel);
 		playerSprite.setPosition(Gdx.graphics.getWidth() / 2 - playerSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - playerSprite.getHeight()/2);
 		playerSprite.setOrigin(playerSprite.getWidth()/2,playerSprite.getHeight()/2);
@@ -48,7 +52,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void render () {
 		spawner.trySpawn();
-		bullet = input.keyInput(playerSprite, bulletModel);
+		bullet = input.keyInput(playerSprite, bulletModel, laserSound, shipSound);
 
 		//playerSprite.setBounds();
 		
@@ -82,5 +86,8 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void dispose () {
 		batch.dispose();
 		playerModel.dispose();
+		bulletModel.dispose();
+		laserSound.dispose();
+		shipSound.dispose();
 	}
 }
