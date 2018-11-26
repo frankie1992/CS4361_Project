@@ -12,7 +12,7 @@ import java.util.List;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
     Random rand;
-    int max = 3; //maximum amount of asteroids that will be spawned
+    int max = 10; //maximum amount of asteroids that will be spawned
     List<Texture> bigModels = new ArrayList<Texture>(); //Asteroids spawn using big models
     List<Texture> medModels = new ArrayList<Texture>(); //Asteroids split into medium models
     List<Texture> smallModels = new ArrayList<Texture>(); //Asteroids split into small models, and can be destroyed
