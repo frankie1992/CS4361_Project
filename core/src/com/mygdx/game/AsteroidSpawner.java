@@ -11,16 +11,15 @@ import java.util.Random;
 import java.util.List;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
-    Random rand;
-    int max = 3; //maximum amount of asteroids that will be spawned
+    private int spawnMax = 5; //Max number of big asteroids to spawn in a wave
+    private int toSpawn = spawnMax; //Number of big asteroids left to spawn
     List<Texture> bigModels = new ArrayList<Texture>(); //Asteroids spawn using big models
     List<Texture> medModels = new ArrayList<Texture>(); //Asteroids split into medium models
     List<Texture> smallModels = new ArrayList<Texture>(); //Asteroids split into small models, and can be destroyed
-    Asteroid[] asteroidArray = new Asteroid[max];
     List<Asteroid> asteroids = new ArrayList<Asteroid>();
-    float currentTime = 0f; //seconds that have passed since game start
-    float nextSpawn = 5f;   //spawn asteroids when currentTime is greater
-    float spawnWait = 5f;   //seconds between waves
+    private float currentTime = 0f; //seconds that have passed since game start
+    float spawnTime = 1f;   //seconds between asteroids spawning
+    private float nextSpawn = currentTime + spawnTime;  //What currentTime must be to spawn next wave
 
 
     AsteroidSpawner(String[] b, String[] m, String[] s) { //Paths for small, medium, and big asteroids given
@@ -37,16 +36,23 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
 
     public void trySpawn() { //Spawns asteroid with random rotation
         currentTime += Gdx.graphics.getDeltaTime(); //advance time
-        if (waveIsReady() && asteroidCount() < max) {
+        if (spawnReady() && toSpawn > 0) {
+            toSpawn--;
+            System.out.println("Asteroid Spawned (" + toSpawn + " left)");
             asteroids.add(new Asteroid(bigModels));
         }
+        else if(toSpawn == 0 && asteroidCount() == 0) {
+            System.out.println("NEXT WAVE!");
+            spawnMax += 2; //more asteroids in next wave
+            toSpawn = spawnMax;
+            spawnTime /= 1.3f; //Spawn rate of asteroids gets faster
+        }
+
     }
 
-    private boolean waveIsReady() {
+    private boolean spawnReady() {
         if(currentTime > nextSpawn) {
-            nextSpawn += spawnWait; //nextSpawn set time is set
-            //spawnWait /= 2; //time between waves decreases
-            System.out.println("Next Wave! (@ " + currentTime + " sec)");
+            nextSpawn += spawnTime; //nextSpawn set time is set
             return true;
         }
         else {
@@ -74,15 +80,15 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
         }
     }
 
-    public int asteroidCount() {return asteroids.size();}
+    public int asteroidCount() { //Returns the number of Big Asteroids still in scene
+        return asteroids.size();
+    }
 }
 
 class Asteroid {
-    float speed, translateX, translateY, rotation;;
-    //Texture bigAsteroid;
-    //Texture smallAsteroid;
+    private float speed, translateX, translateY, rotation;;
     Sprite sprite;
-    int size; //Determines whether it can be split
+    private int size; //Determines whether it can be split
 
     public Asteroid(List<Texture> models) { //Default spawn
         size = 3; //Big asteroid
@@ -168,7 +174,7 @@ class Asteroid {
         split(spawner);
     }
 
-    public void split(AsteroidSpawner spawner) { //Split asteroid when hit
+    private void split(AsteroidSpawner spawner) { //Split asteroid when hit
         Asteroid a1, a2;
         float speedUp = speed*1.5f;
         float angle = 45f;
@@ -188,5 +194,9 @@ class Asteroid {
         spawner.asteroids.remove(this); //Remove after splitting
         spawner.asteroids.add(a1);
         spawner.asteroids.add(a2);
+    }
+
+    public int getSize() {
+        return size;
     }
 }

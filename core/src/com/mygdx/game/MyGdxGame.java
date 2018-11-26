@@ -46,7 +46,6 @@ public class MyGdxGame extends ApplicationAdapter {
 		String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png","Asteroids/Med/Asteroid_Med2.png"};
 		String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png","Asteroids/Small/Asteroid_Small2.png"};
 		spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid);
-		//spawner.spawn();
 	}
 
 	@Override
