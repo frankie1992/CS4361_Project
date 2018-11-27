@@ -500,9 +500,6 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
 
         bullets.removeAll(deletebullets);
-       // for(int i = 0; i < spawner.asteroidCount(); i++) { //Draw each asteroid currently spawned
-       //     spawner.getAsteroid(i).sprite.draw(batch);
-     //   }
          wrapScreen.wrapScreen(playerSprite , shipBody);
 //        wrapScreen.wrapScreen(sprite , astoridBody);
 //        wrapScreen.wrapScreen(sprite1 , astoridBod1y);

@@ -23,7 +23,6 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
     List<Texture> bigModels = new ArrayList<Texture>(); //Asteroids spawn using big models
     List<Texture> medModels = new ArrayList<Texture>(); //Asteroids split into medium models
     List<Texture> smallModels = new ArrayList<Texture>(); //Asteroids split into small models, and can be destroyed
-    Asteroid[] asteroidArray = new Asteroid[max];
     List<Asteroid> asteroids = new ArrayList<Asteroid>();
     float currentTime = 0f; //seconds that have passed since game start
     float nextSpawn = 5f;   //spawn asteroids when currentTime is greater
@@ -109,7 +108,7 @@ class Asteroid   {
 
         int index = rand.nextInt(models.size()); //choose sprite randomly
         sprite = new Sprite(models.get(index)); //Assign sprite to asteroid
-        speed = (rand.nextFloat() * 3) + 1;   //random speed from 1 to 4
+        speed = (rand.nextFloat() * 60) + 20;   //random speed from 20 to 80
         rotation = rand.nextFloat() * 360;    //direction asteroid will move
         translateX = speed * (float) (Math.cos(Math.toRadians(rotation))); //Set velocity
         translateY = speed * (float) (Math.sin(Math.toRadians(rotation)));
@@ -151,7 +150,7 @@ class Asteroid   {
     public void move() {
         //sprite.translate(translateX, translateY);
         //wrapScreen();
-        sprite.setPosition((body.getPosition().x * 100) - ( sprite.getWidth()/2 ),
+        sprite.setPosition((body.getPosition().x * 100) - ( sprite.getWidth()/2),
                 (body.getPosition().y * 100) - ( sprite.getHeight()/2 ));
         sprite.setRotation((float) Math.toDegrees((body.getAngle())));
     }
@@ -188,6 +187,7 @@ class Asteroid   {
 
     public void destroyFrom(AsteroidSpawner spawner) { //When hit, asteroid is removed from list
         if(size-1 == 0) {
+            //hitbox.dispose();
             spawner.asteroids.remove(this);//Remove asteroid
             //System.out.println("Asteroid Destroyed");
         }
@@ -197,7 +197,7 @@ class Asteroid   {
 
     public void split(AsteroidSpawner spawner) { //Split asteroid when hit
         Asteroid a1, a2;
-        float speedUp = speed*1.5f;
+        float speedUp = speed*0.3f;
         float angle = 45f;
         switch(size) {
             case 3: //Big Asteroid
@@ -212,9 +212,10 @@ class Asteroid   {
             default:
                 return;
         }
-        spawner.asteroids.remove(this); //Remove after splitting
+        //hitbox.dispose(); //Remove hitbox after splitting
         spawner.asteroids.add(a1);
         spawner.asteroids.add(a2);
+        spawner.asteroids.remove(this); //Remove after splitting
     }
 
     private void setHitBox() { //Set up Hitbox for this asteroid using Box2D methods
@@ -233,6 +234,7 @@ class Asteroid   {
         fixDefast.density = 0.1f;
         fixDefast.friction = 10f;
         body.createFixture(fixDefast);
+        System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
         body.applyForceToCenter(translateX,translateY+3,true);
         body.applyTorque(0.09f,true);
     }
