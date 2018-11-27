@@ -7,10 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -38,7 +35,7 @@ public class MainMenu implements Screen
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         //
-        Label gameTitle = new Label("ASTEROID",skin ,"default");
+        Label gameTitle = new Label("ASTEROIDS",skin ,"default");
         gameTitle.setAlignment(Align.center);
         gameTitle.setHeight(Gdx.graphics.getHeight()* 1.5f);
         gameTitle.setWidth(Gdx.graphics.getWidth());
@@ -66,7 +63,7 @@ public class MainMenu implements Screen
         TextButton startButton = new TextButton("START GAME",skin,"default");
         TextButton highscoreButton = new TextButton("HIGH SCORE",skin,"default");
         TextButton optionButton = new TextButton("OPTION",skin,"default");
-        TextButton instructionButton = new TextButton("INSTRUCTION ",skin,"default");
+        TextButton instructionButton = new TextButton("INSTRUCTIONS ",skin,"default");
         TextButton exitButton = new TextButton("EXIT",skin,"default");
 
 
@@ -96,6 +93,12 @@ public class MainMenu implements Screen
 
             public void touchUp (InputEvent event, float x, float y, int pointer , int button)
             {
+                startButton.setTouchable(Touchable.disabled);
+                optionButton.setTouchable(Touchable.disabled);
+                instructionButton.setTouchable(Touchable.disabled);
+                exitButton.setTouchable(Touchable.disabled);
+                highscoreButton.setTouchable(Touchable.disabled);
+
                 game.setScreen(new AsteroidGame(  ));
             }
 
@@ -206,13 +209,7 @@ public class MainMenu implements Screen
 
 
     }
-    public void create()
-    {
 
-
-
-
-    }
 
     @Override
     public void show() {
@@ -264,7 +261,6 @@ public class MainMenu implements Screen
     @Override
     public void dispose() {
         batch.dispose();
-
         stage.dispose();
     }
 }

@@ -1,14 +1,22 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
+import java.util.Scanner;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
     Random rand;
@@ -33,6 +41,9 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
         for(String path : s) {
             smallModels.add(new Texture(path));
         }
+
+
+
     }
 
     public void trySpawn() { //Spawns asteroid with random rotation
@@ -77,16 +88,26 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
     public int asteroidCount() {return asteroids.size();}
 }
 
-class Asteroid {
-    float speed, translateX, translateY, rotation;;
+class Asteroid   {
+    float speed, translateX, translateY, rotation;
+    World worldphysics;
+    SpriteBatch batch;
+
+
     //Texture bigAsteroid;
     //Texture smallAsteroid;
     Sprite sprite;
     int size; //Determines whether it can be split
-
+    PolygonShape astoridhitbox;
+    Body astoridBody;
+    Box2DDebugRenderer renderer;
+    Matrix4 dm;
     public Asteroid(List<Texture> models) { //Default spawn
         size = 3; //Big asteroid
+        batch = new SpriteBatch();
+
         Random rand = new Random();
+
         int index = rand.nextInt(models.size()); //choose sprite randomly
         sprite = new Sprite(models.get(index)); //Assign sprite to asteroid
         speed = (rand.nextFloat() * 3) + 1;   //random speed from 1 to 4
@@ -96,9 +117,30 @@ class Asteroid {
 
         //Set spawn conditions
         sprite.rotate(rotation);
-        sprite.setPosition(rand.nextInt(20),rand.nextInt(20));
+        int x = rand.nextInt(20);
+        int y = rand.nextInt(20);
+        sprite.setPosition(x,y);
         sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
         //sprite.setBounds(); //Collision
+
+        // Physics
+
+        worldphysics = new World(new Vector2(0,0),true);
+        renderer = new Box2DDebugRenderer();
+
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(((sprite.getX() + sprite.getWidth()/2)/100),
+                ( (sprite.getY() + sprite.getHeight()/2)/100) );
+        astoridBody = worldphysics.createBody(bodyDef);
+        astoridhitbox = new PolygonShape();
+        astoridhitbox.setAsBox((sprite.getWidth()/2) / 100,
+                (sprite.getHeight()/2)/100);
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.shape = astoridhitbox;
+        fixDef.density = 0.1f;
+        astoridBody.createFixture(fixDef);
+        astoridhitbox.dispose();
     }
 
     public Asteroid(List<Texture> models, int si, float sp, float x, float y, float rot) { //If spawned from parent asteroid
@@ -189,4 +231,8 @@ class Asteroid {
         spawner.asteroids.add(a1);
         spawner.asteroids.add(a2);
     }
+
+
+
+
 }

@@ -6,22 +6,24 @@ package com.mygdx.game;
         import com.badlogic.gdx.graphics.Texture;
         import com.badlogic.gdx.graphics.g2d.Sprite;
         import com.badlogic.gdx.audio.Sound;
+        import com.badlogic.gdx.graphics.g2d.TextureAtlas;
         import com.badlogic.gdx.physics.box2d.Body;
+        import com.badlogic.gdx.physics.box2d.BodyDef;
 
         import java.util.Random;
 
 
 public class PlayerInput {
     Random randNumber;
-    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture, Sound laserSound, Sound shipSound, Body shipBody)
+    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture, Sound laserSound, Sound shipSound, Body shipBody, Body astoridBody)
     {
         randNumber = new Random();
 
         float rotateDegree = 4f;
         float translateSpeed = 0.5f;
         float torque = 0f;
-
-
+        Texture moveShip;
+        Sprite moveShipMode;
         // Rotate left button
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
         {
@@ -62,9 +64,11 @@ public class PlayerInput {
                 translateSpeed = 0.5f;
 
             }
+
+
             // Player Movement in regard to the rotation
 
-             playerSprite.translate(  (float ) (  translateSpeed * Math.cos(Math.toRadians(playerSprite.getRotation())))
+            playerSprite.translate(  (float ) (  translateSpeed * Math.cos(Math.toRadians(playerSprite.getRotation())))
                      , (float ) (  translateSpeed * Math.sin(Math.toRadians(playerSprite.getRotation())))) ;
 
             float x = (float ) (  translateSpeed * Math.cos(Math.toRadians(playerSprite.getRotation())));
@@ -72,20 +76,19 @@ public class PlayerInput {
           //  shipBody.setLinearVelocity(2,2);
 
             shipBody.applyForceToCenter(x,y,true);
-
-        }
+           // astoridBody.applyForceToCenter(10,10,true);
+         }
 
 
         // Move the ship to a new random position
         if (Gdx.input.isKeyPressed(Input.Keys.X))
         {
-            int randPosX = randNumber.nextInt((Gdx.app.getGraphics().getWidth()-50) - (10)+10);
-            int randPosY = randNumber.nextInt((Gdx.app.getGraphics().getHeight()-50) - (10)+10);
+            int randPosX = randNumber.nextInt((Gdx.app.getGraphics().getWidth()) - (10)+10);
+            int randPosY = randNumber.nextInt((Gdx.app.getGraphics().getHeight()) - (10)+10);
 
             // Set the X-axis
-            playerSprite.setX(randPosX);
-            // Set the Y-axis
-            playerSprite.setY(randPosY);
+            shipBody.setTransform(randPosX,randPosY,shipBody.getAngle());
+
         }
 
         // shot a bullet

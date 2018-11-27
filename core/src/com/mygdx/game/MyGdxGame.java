@@ -28,6 +28,7 @@ public class MyGdxGame extends Game {
 	@Override
 	public void dispose () {
 	//	asteroidGame.dispose();
+		super.dispose();
 
  	}
 }
