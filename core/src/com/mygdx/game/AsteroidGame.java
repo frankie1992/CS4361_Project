@@ -31,7 +31,6 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
     Sprite playerSprite;
     PlayerInput input;
     WrapEffect wrapScreen;
-    AsteroidSpawner spawner;
     Bullet bullet;
     List<Bullet> bullets = new ArrayList<>();
     List<Bullet> deletebullets = new ArrayList<>();
@@ -47,13 +46,19 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
     PolygonShape bulletHitbox;
     float speed, translateX, translateY, rotation;
     World worldphysics;
+
+
+
+    Skin skin;
+    int gameScore = 0;
+    int gameLives = 3;
+    Table table;
+
+    //Asteroid:
     Sprite sprite;
     Texture astroid;
     PolygonShape astoridhitbox;
     Body astoridBody;
-
-
-
     Sprite sprite1;
     Texture astroid1;
     PolygonShape astoridhitbox1;
@@ -74,19 +79,19 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
     Texture astroid5;
     PolygonShape astoridhitbox5;
     Body astoridBod15;
-    Skin skin;
-    int gameScore = 0;
-    int gameLives = 3;
-    Table table;
+
+     AsteroidSpawner spawner;
+     String[] bigAsteroid = {"Asteroids/Big/Asteroid_Big1.png", "Asteroids/Big/Asteroid_Big2.png"};
+     String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png","Asteroids/Med/Asteroid_Med2.png"};
+     String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png","Asteroids/Small/Asteroid_Small2.png"};
+
     public   AsteroidGame  () {
         create();
      }
 
      public void create()
      {
-
          skin = new Skin(Gdx.files.internal("uiskin.json"));
-         //
          table = new Table();
 
          Label score = new Label("Score: " + gameScore,skin ,"default");
@@ -102,7 +107,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
 
          batch = new SpriteBatch();
-            renderer = new Box2DDebugRenderer();
+         renderer = new Box2DDebugRenderer();
          playerModel = new Texture("Player/shipTest.png");
          astroid = new Texture("Asteroids/Small/Asteroid_Small2.png");
          astroid1 = new Texture("Asteroids/Big/Asteroid_Big2.png");
@@ -167,9 +172,15 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
          shipBody.createFixture(fixDef);
 
+         ////////////////////////////////////////////////////////////////////////////////////////////////////////
+         ///////////////////////////////    ASTEROID SPAWNER    /////////////////////////////////////////////////
+         ////////////////////////////////////////////////////////////////////////////////////////////////////////
+         spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid, worldPhysics);
          // rocks
          renderer = new Box2DDebugRenderer();
 
+         /******************************************
+         //Rock 1
          BodyDef bodyDef = new BodyDef();
          bodyDef.type = BodyDef.BodyType.DynamicBody;
          bodyDef.position.set(((sprite.getX() + sprite.getWidth()/2)/100),
@@ -330,19 +341,14 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         // createAstroid(sprite5, astoridhitbox5, astoridBod15);
 
          //Asteroid:
-         /*
-         String[] bigAsteroid = {"Asteroids/Big/Asteroid_Big1.png", "Asteroids/Big/Asteroid_Big2.png"};
-         String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png","Asteroids/Med/Asteroid_Med2.png"};
-         String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png","Asteroids/Small/Asteroid_Small2.png"};
-         spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid );
-         */
+
          astoridhitbox.dispose();
          astoridhitbox1.dispose();
          astoridhitbox2.dispose();
          astoridhitbox3.dispose();
          astoridhitbox4.dispose();
          astoridhitbox5.dispose();
-
+          ****************************************/
          shipHitbox.dispose();
      }
     public void render () {
@@ -377,15 +383,20 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
         worldPhysics.step(1f/150f , 6, 2);
         wrapScreen.wrapScreen(playerSprite , shipBody);
-        wrapScreen.wrapScreen(sprite , astoridBody);
+        /**wrapScreen.wrapScreen(sprite , astoridBody);
         wrapScreen.wrapScreen(sprite1 , astoridBod1y);
         wrapScreen.wrapScreen(sprite2 , astoridBod12);
         wrapScreen.wrapScreen(sprite3 , astoridBod13);
         wrapScreen.wrapScreen(sprite4 , astoridBod14);
         wrapScreen.wrapScreen(sprite5 , astoridBod15);
+         *****/
+        for(int i = 0; i < spawner.asteroidCount(); i++) { //Apply wrap effect for each asteroid
+            wrapScreen.wrapScreen(spawner.getAsteroid(i).sprite, spawner.getAsteroid(i).body);
+        }
         playerSprite.setPosition((shipBody.getPosition().x * 100) - ( playerSprite.getWidth()/2 ),
                (shipBody.getPosition().y * 100) - ( playerSprite.getHeight()/2 ));
         playerSprite.setRotation((float) Math.toDegrees((shipBody.getAngle())));
+        /**
         sprite.setPosition((astoridBody.getPosition().x * 100) - ( sprite.getWidth()/2 ),
                 (astoridBody.getPosition().y * 100) - ( sprite.getHeight()/2 ));
         sprite.setRotation((float) Math.toDegrees((astoridBody.getAngle())));
@@ -405,7 +416,8 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         sprite5.setPosition((astoridBod15.getPosition().x * 100) - ( sprite1.getWidth()/2 ),
                 (astoridBod15.getPosition().y * 100) - ( sprite5.getHeight()/2 ));
         sprite5.setRotation((float) Math.toDegrees((astoridBod15.getAngle())));
-      //  spawner.trySpawn();
+         ****/
+      spawner.trySpawn();
 
        bullet = input.keyInput(playerSprite, bulletModel, laserSound, shipSound, shipBody, astoridBody);
 
@@ -415,7 +427,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         }
 
 
-     //   spawner.moveAll();
+        spawner.moveAll();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -424,22 +436,28 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
 
           playerSprite.draw(batch);
-        sprite.draw(batch);
+        /**sprite.draw(batch);
         sprite1.draw(batch);
         sprite2.draw(batch);
         sprite3.draw(batch);
         sprite4.draw(batch);
-        sprite5.draw(batch);
+        sprite5.draw(batch);*/
+        for(int i = 0; i < spawner.asteroidCount(); i++) {
+            spawner.getAsteroid(i).sprite.draw(batch);
+        }
 
         table.draw(batch,10f);
 
         wrapScreen.wrapScreen(playerSprite , shipBody);
-        wrapScreen.wrapScreen(sprite , astoridBody);
+        /**wrapScreen.wrapScreen(sprite , astoridBody);
         wrapScreen.wrapScreen(sprite1 , astoridBod1y);
         wrapScreen.wrapScreen(sprite2 , astoridBod12);
         wrapScreen.wrapScreen(sprite3 , astoridBod13);
         wrapScreen.wrapScreen(sprite4 , astoridBod14);
-        wrapScreen.wrapScreen(sprite5 , astoridBod15);
+        wrapScreen.wrapScreen(sprite5 , astoridBod15);*/
+        for(int i = 0; i < spawner.asteroidCount(); i++) { //Apply wrap effect for each asteroid
+            wrapScreen.wrapScreen(spawner.getAsteroid(i).sprite, spawner.getAsteroid(i).body);
+        }
 
 
 
@@ -486,12 +504,15 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
        //     spawner.getAsteroid(i).sprite.draw(batch);
      //   }
          wrapScreen.wrapScreen(playerSprite , shipBody);
-        wrapScreen.wrapScreen(sprite , astoridBody);
-        wrapScreen.wrapScreen(sprite1 , astoridBod1y);
-        wrapScreen.wrapScreen(sprite2 , astoridBod12);
-        wrapScreen.wrapScreen(sprite3 , astoridBod13);
-        wrapScreen.wrapScreen(sprite4 , astoridBod14);
-        wrapScreen.wrapScreen(sprite5 , astoridBod15);
+//        wrapScreen.wrapScreen(sprite , astoridBody);
+//        wrapScreen.wrapScreen(sprite1 , astoridBod1y);
+//        wrapScreen.wrapScreen(sprite2 , astoridBod12);
+//        wrapScreen.wrapScreen(sprite3 , astoridBod13);
+//        wrapScreen.wrapScreen(sprite4 , astoridBod14);
+//        wrapScreen.wrapScreen(sprite5 , astoridBod15);
+        for(int i = 0; i < spawner.asteroidCount(); i++) { //Apply wrap effect for each asteroid
+            wrapScreen.wrapScreen(spawner.getAsteroid(i).sprite, spawner.getAsteroid(i).body);
+        }
         batch.end();
 
         renderer.render(worldPhysics,dm);
