@@ -32,9 +32,9 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 		playerModel = new Texture("Player/shipTest.png");
-		shipSound = Gdx.audio.newSound(Gdx.files.internal("Player/ship_move2.wav"));
+		shipSound = Gdx.audio.newSound(Gdx.files.internal("Player/thrust.wav"));
 		bulletModel = new Texture("Laser/Bullet.png");
-		laserSound = Gdx.audio.newSound(Gdx.files.internal("Laser/laser_sound2.wav"));
+		laserSound = Gdx.audio.newSound(Gdx.files.internal("Laser/laser_sound.wav"));
 		playerSprite = new Sprite(playerModel);
 		playerSprite.setPosition(Gdx.graphics.getWidth() / 2 - playerSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - playerSprite.getHeight()/2);
 		playerSprite.setOrigin(playerSprite.getWidth()/2,playerSprite.getHeight()/2);
