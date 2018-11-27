@@ -6,29 +6,43 @@ package com.mygdx.game;
         import com.badlogic.gdx.graphics.Texture;
         import com.badlogic.gdx.graphics.g2d.Sprite;
         import com.badlogic.gdx.audio.Sound;
+        import com.badlogic.gdx.physics.box2d.Body;
+
         import java.util.Random;
 
 
 public class PlayerInput {
     Random randNumber;
-    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture, Sound laserSound, Sound shipSound)
+    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture, Sound laserSound, Sound shipSound, Body shipBody)
     {
         randNumber = new Random();
 
         float rotateDegree = 4f;
-        float translateSpeed = 3f;
+        float translateSpeed = 0.5f;
+        float torque = 0f;
+
 
         // Rotate left button
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
         {
-            playerSprite.rotate(rotateDegree);
+           // playerSprite.rotate( rotateDegree);
+            torque = torque + 0.01f;
+            shipBody.applyTorque(torque, true);
+
         }
 
 
         // Rotate right button
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
         {
-            playerSprite.rotate(-rotateDegree);
+         //   playerSprite.rotate(-rotateDegree);
+            torque = torque - 0.01f;
+            shipBody.applyTorque(torque, true);
+
+
+
+
+
         }
 
         // Move Foward Button
@@ -36,18 +50,29 @@ public class PlayerInput {
         {
             if (Gdx.input.isKeyJustPressed(Input.Keys.UP)){
                 shipSound.play();
+
+            //   shipBody.applyForceToCenter(0f,5f,true);
+
             }
             // Speed Button
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))
             {
                 // Change to dash
 
-                translateSpeed = 12;
+                translateSpeed = 0.5f;
 
             }
             // Player Movement in regard to the rotation
-            playerSprite.translate(  (float ) (  translateSpeed * Math.cos(Math.toRadians(playerSprite.getRotation())))
-                    , (float ) (  translateSpeed * Math.sin(Math.toRadians(playerSprite.getRotation())))) ;
+
+             playerSprite.translate(  (float ) (  translateSpeed * Math.cos(Math.toRadians(playerSprite.getRotation())))
+                     , (float ) (  translateSpeed * Math.sin(Math.toRadians(playerSprite.getRotation())))) ;
+
+            float x = (float ) (  translateSpeed * Math.cos(Math.toRadians(playerSprite.getRotation())));
+            float y = (float ) (  translateSpeed * Math.sin(Math.toRadians(playerSprite.getRotation())));
+          //  shipBody.setLinearVelocity(2,2);
+
+            shipBody.applyForceToCenter(x,y,true);
+
         }
 
 
