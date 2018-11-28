@@ -19,19 +19,18 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
-    Random rand;
     int max = 10; //maximum amount of asteroids that will be spawned
     List<Texture> bigModels = new ArrayList<Texture>(); //Asteroids spawn using big models
     List<Texture> medModels = new ArrayList<Texture>(); //Asteroids split into medium models
     List<Texture> smallModels = new ArrayList<Texture>(); //Asteroids split into small models, and can be destroyed
-    Asteroid[] asteroidArray = new Asteroid[max];
     List<Asteroid> asteroids = new ArrayList<Asteroid>();
     float currentTime = 0f; //seconds that have passed since game start
     float nextSpawn = 5f;   //spawn asteroids when currentTime is greater
     float spawnWait = 5f;   //seconds between waves
+    World physics;
 
 
-    AsteroidSpawner(String[] b, String[] m, String[] s) { //Paths for small, medium, and big asteroids given
+    AsteroidSpawner(String[] b, String[] m, String[] s, World phys) { //Paths for small, medium, and big asteroids given
         for(String path : b) { //Each file is added to respective list
             bigModels.add(new Texture(path));
         }
@@ -41,15 +40,13 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
         for(String path : s) {
             smallModels.add(new Texture(path));
         }
-
-
-
+        physics = phys;
     }
 
     public void trySpawn() { //Spawns asteroid with random rotation
         currentTime += Gdx.graphics.getDeltaTime(); //advance time
         if (waveIsReady() && asteroidCount() < max) {
-            asteroids.add(new Asteroid(bigModels));
+            asteroids.add(new Asteroid(bigModels, physics));
         }
     }
 
@@ -89,28 +86,29 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
 }
 
 class Asteroid   {
+    //Attributes:
     float speed, translateX, translateY, rotation;
-    World worldphysics;
-    SpriteBatch batch;
-
-
-    //Texture bigAsteroid;
-    //Texture smallAsteroid;
-    Sprite sprite;
     int size; //Determines whether it can be split
-    PolygonShape astoridhitbox;
-    Body astoridBody;
+
+    //Sprites:
+    SpriteBatch batch;
+    Sprite sprite;
+
+    //Hitbox:
+    World physics;
+    PolygonShape hitbox;
+    Body body;
     Box2DDebugRenderer renderer;
     Matrix4 dm;
-    public Asteroid(List<Texture> models) { //Default spawn
+    public Asteroid(List<Texture> models, World phys) { //Default spawn
         size = 3; //Big asteroid
         batch = new SpriteBatch();
-
+        physics = phys;
         Random rand = new Random();
 
         int index = rand.nextInt(models.size()); //choose sprite randomly
         sprite = new Sprite(models.get(index)); //Assign sprite to asteroid
-        speed = (rand.nextFloat() * 3) + 1;   //random speed from 1 to 4
+        speed = (rand.nextFloat() * 60) + 20;   //random speed from 20 to 80
         rotation = rand.nextFloat() * 360;    //direction asteroid will move
         translateX = speed * (float) (Math.cos(Math.toRadians(rotation))); //Set velocity
         translateY = speed * (float) (Math.sin(Math.toRadians(rotation)));
@@ -121,29 +119,12 @@ class Asteroid   {
         int y = rand.nextInt(20);
         sprite.setPosition(x,y);
         sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
-        //sprite.setBounds(); //Collision
-
-        // Physics
-
-        worldphysics = new World(new Vector2(0,0),true);
-        renderer = new Box2DDebugRenderer();
-
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(((sprite.getX() + sprite.getWidth()/2)/100),
-                ( (sprite.getY() + sprite.getHeight()/2)/100) );
-        astoridBody = worldphysics.createBody(bodyDef);
-        astoridhitbox = new PolygonShape();
-        astoridhitbox.setAsBox((sprite.getWidth()/2) / 100,
-                (sprite.getHeight()/2)/100);
-        FixtureDef fixDef = new FixtureDef();
-        fixDef.shape = astoridhitbox;
-        fixDef.density = 0.1f;
-        astoridBody.createFixture(fixDef);
-        astoridhitbox.dispose();
+        setHitBox();
+        hitbox.dispose();
     }
 
-    public Asteroid(List<Texture> models, int si, float sp, float x, float y, float rot) { //If spawned from parent asteroid
+    public Asteroid(List<Texture> models, int si, float sp, float x, float y, float rot, World phys) { //If spawned from parent asteroid
+        physics = phys;
         size = si;
         if(size == 0) {
             System.out.println("ERROR: Can't spawn asteroid! (size = " + size + ")"); //ERROR
@@ -161,78 +142,83 @@ class Asteroid   {
         sprite.rotate(rotation);
         sprite.setPosition(x, y); //Spawns in same position as parent
         sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
-        //sprite.setBounds(); //Collision
 
-
+        setHitBox();
+        hitbox.dispose();
     }
 
     public void move() {
-        sprite.translate(translateX, translateY);
-        wrapScreen();
-    }
-
-    private void wrapScreen()
-    {
-        // Left bounds limit
-        if (sprite.getX()<= -50 )
-        {
-            sprite.translateX(Gdx.graphics.getWidth());
-
-        }
-
-        // Right bounds limit
-        if (sprite.getX() >= Gdx.app.getGraphics().getWidth())
-        {
-            sprite.translateX(-Gdx.app.getGraphics().getWidth());
-        }
-
-        // Botton bounds limit
-        if (sprite.getY()<= -50  )
-        {
-            sprite.translateY(Gdx.graphics.getHeight());
-
-        }
-
-        // Top bounds limit
-        if (sprite.getY() >= Gdx.app.getGraphics().getHeight())
-        {
-            sprite.translateY(-Gdx.app.getGraphics().getHeight());
-        }
+        //sprite.translate(translateX, translateY);
+        //wrapScreen();
+        sprite.setPosition((body.getPosition().x * 100) - ( sprite.getWidth()/2),
+                (body.getPosition().y * 100) - ( sprite.getHeight()/2 ));
+        sprite.setRotation((float) Math.toDegrees((body.getAngle())));
 
     }
+
+
 
     public void destroyFrom(AsteroidSpawner spawner) { //When hit, asteroid is removed from list
         if(size-1 == 0) {
+            //hitbox.dispose();
             spawner.asteroids.remove(this);//Remove asteroid
+            physics.destroyBody(body);
+
             //System.out.println("Asteroid Destroyed");
         }
         else //if asteroid can be split
-        split(spawner);
+        {
+            split(spawner);
+            physics.destroyBody(body);
+
+
+        }
     }
 
     public void split(AsteroidSpawner spawner) { //Split asteroid when hit
         Asteroid a1, a2;
-        float speedUp = speed*1.5f;
+        float speedUp = speed*0.3f;
         float angle = 45f;
         switch(size) {
             case 3: //Big Asteroid
-                a1 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle);
-                a2 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle);
+                a1 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle, physics);
+                a2 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle, physics);
                 break;
             case 2: //Medium Asteroid
-                a1 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle);
-                a2 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle);
+                a1 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle, physics);
+                a2 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle, physics);
                 break;
             case 1: //Small Asteroid -- do nothing
             default:
                 return;
         }
-        spawner.asteroids.remove(this); //Remove after splitting
+        // hitbox.dispose(); //Remove hitbox after splitting
         spawner.asteroids.add(a1);
         spawner.asteroids.add(a2);
+        spawner.asteroids.remove(this); //Remove after splitting
+
     }
 
 
 
-
+    private void setHitBox() { //Set up Hitbox for this asteroid using Box2D methods
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(((sprite.getX() + sprite.getWidth()/2)/100),
+                ( (sprite.getY() + sprite.getHeight()/2)/100) );
+        body = physics.createBody(bodyDef);
+        hitbox = new PolygonShape();
+        hitbox.setAsBox((sprite.getWidth()/2) / 100,
+                (sprite.getHeight()/2)/100);
+        FixtureDef fixDefast = new FixtureDef();
+        fixDefast.filter.categoryBits = 0x0002;
+        fixDefast.filter.groupIndex = -1;
+        fixDefast.shape = hitbox;
+        fixDefast.density = 0.1f;
+        fixDefast.friction = 10f;
+        body.createFixture(fixDefast);
+        System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
+        body.applyForceToCenter(translateX,translateY+3,true);
+        body.applyTorque(0.09f,true);
+    }
 }

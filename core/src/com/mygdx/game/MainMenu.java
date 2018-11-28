@@ -19,11 +19,11 @@ public class MainMenu implements Screen
 {
 
     //
-     Stage stage;
+    Stage stage;
     Skin skin;
     Table table;
     SpriteBatch batch;
-     Sprite background;
+    Sprite background;
     Game game;
     AsteroidSpawner spawner;
     public MainMenu(Game gamePass)
@@ -55,7 +55,7 @@ public class MainMenu implements Screen
         String[] bigAsteroid = {"Asteroids/Big/Asteroid_Big1.png", "Asteroids/Big/Asteroid_Big2.png"};
         String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png","Asteroids/Med/Asteroid_Med2.png"};
         String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png","Asteroids/Small/Asteroid_Small2.png"};
-        spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid);
+        //spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid);
         Gdx.input.setInputProcessor(stage);
 
 
@@ -107,7 +107,7 @@ public class MainMenu implements Screen
             public boolean touchDown ( InputEvent event, float x, float y, int pointer , int button)
             {
                 return true;
-              }
+            }
         });
 
         highscoreButton.addListener(new InputListener()
@@ -115,13 +115,26 @@ public class MainMenu implements Screen
 
             public void touchUp (InputEvent event, float x, float y, int pointer , int button)
             {
-               game.setScreen(new HighScoreMenu( game));
+                startButton.setTouchable(Touchable.disabled);
+                optionButton.setTouchable(Touchable.disabled);
+                instructionButton.setTouchable(Touchable.disabled);
+                exitButton.setTouchable(Touchable.disabled);
+                highscoreButton.setTouchable(Touchable.disabled);
+
+                game.setScreen(new HighScoreMenu( game));
             }
 
 
             @Override
             public boolean touchDown ( InputEvent event, float x, float y, int pointer , int button)
             {
+
+                startButton.setTouchable(Touchable.disabled);
+                optionButton.setTouchable(Touchable.disabled);
+                instructionButton.setTouchable(Touchable.disabled);
+                exitButton.setTouchable(Touchable.disabled);
+                highscoreButton.setTouchable(Touchable.disabled);
+
                 return true;
             }
         });
@@ -131,6 +144,13 @@ public class MainMenu implements Screen
 
             public void touchUp (InputEvent event, float x, float y, int pointer , int button)
             {
+
+                startButton.setTouchable(Touchable.disabled);
+                optionButton.setTouchable(Touchable.disabled);
+                instructionButton.setTouchable(Touchable.disabled);
+                exitButton.setTouchable(Touchable.disabled);
+                highscoreButton.setTouchable(Touchable.disabled);
+
                 game.setScreen(new OptionMenu(game));
             }
 
@@ -138,6 +158,8 @@ public class MainMenu implements Screen
             @Override
             public boolean touchDown ( InputEvent event, float x, float y, int pointer , int button)
             {
+
+
                 return true;
             }
         });
@@ -147,7 +169,13 @@ public class MainMenu implements Screen
 
             public void touchUp (InputEvent event, float x, float y, int pointer , int button)
             {
-              game.setScreen(new InstructionMenu(game));
+                startButton.setTouchable(Touchable.disabled);
+                optionButton.setTouchable(Touchable.disabled);
+                instructionButton.setTouchable(Touchable.disabled);
+                exitButton.setTouchable(Touchable.disabled);
+                highscoreButton.setTouchable(Touchable.disabled);
+
+                game.setScreen(new InstructionMenu(game));
             }
 
 
@@ -163,8 +191,9 @@ public class MainMenu implements Screen
 
             public void touchUp (InputEvent event, float x, float y, int pointer , int button)
             {
+
                 Gdx.app.exit();
-             }
+            }
 
 
             @Override
@@ -213,28 +242,28 @@ public class MainMenu implements Screen
 
     @Override
     public void show() {
-     }
+    }
 
     @Override
     public void render(float delta) {
-        spawner.max = 20;
+//        spawner.max = 20;
+//
+//        spawner.trySpawn();
 
-        spawner.trySpawn();
 
-
-         spawner.moveAll();
+//         spawner.moveAll();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
 
-        for(int i = 0; i < spawner.asteroidCount(); i++) { //Draw each asteroid currently spawned
-            spawner.getAsteroid(i).sprite.draw(batch);
-        }
+//        for(int i = 0; i < spawner.asteroidCount(); i++) { //Draw each asteroid currently spawned
+//            spawner.getAsteroid(i).sprite.draw(batch);
+//        }
         batch.end();
 
 
-         stage.draw();
+        stage.draw();
     }
 
 
@@ -264,7 +293,4 @@ public class MainMenu implements Screen
         stage.dispose();
     }
 }
-
-
-
 

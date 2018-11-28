@@ -9,21 +9,21 @@ package com.mygdx.game;
         import com.badlogic.gdx.graphics.g2d.TextureAtlas;
         import com.badlogic.gdx.physics.box2d.Body;
         import com.badlogic.gdx.physics.box2d.BodyDef;
+        import com.badlogic.gdx.physics.box2d.World;
 
         import java.util.Random;
 
 
 public class PlayerInput {
     Random randNumber;
-    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture, Sound laserSound, Sound shipSound, Body shipBody, Body astoridBody)
+    World Physics;
+    public  Bullet keyInput(Sprite playerSprite, Texture bulletTexture, Sound laserSound, Sound shipSound, Body shipBody, World physics  )
     {
         randNumber = new Random();
-
-        float rotateDegree = 4f;
-        float translateSpeed = 0.5f;
+        Physics = physics;
+         float translateSpeed = 0.5f;
         float torque = 0f;
-        Texture moveShip;
-        Sprite moveShipMode;
+
         // Rotate left button
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
         {
@@ -94,7 +94,7 @@ public class PlayerInput {
         // shot a bullet
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
         {
-            Bullet bullet = new Bullet(playerSprite.getX(),playerSprite.getY(),8,(float)Math.toRadians(playerSprite.getRotation()), bulletTexture);
+            Bullet bullet = new Bullet(playerSprite.getX(),playerSprite.getY(),8,(float)Math.toRadians(playerSprite.getRotation()), bulletTexture, shipBody, Physics  );
             laserSound.play();
             return bullet;
         }

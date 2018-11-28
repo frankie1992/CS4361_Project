@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
-public class Bullet implements Screen {
+public class Bullet   {
 
     Texture bulletTexture;
     float x,y,dx,dy,dt, radians, time, speed;
@@ -18,40 +18,28 @@ public class Bullet implements Screen {
     Body bulletBody;
     PolygonShape bulletHitbox;
     World worldPhysics;
+    Body body;
+    PolygonShape hitbox;
 
 
-    public Bullet(float x, float y, float speed, float radians, Texture bulletTexture){
+    public Bullet(float x, float y, float speed, float radians, Texture bulletTexture, Body shipBody, World worldPhy){
         this.x = x;
         this.y = y;
+
         this.speed = speed;
         this.radians=radians;
         this.bulletTexture = bulletTexture;
         this.dt = Gdx.graphics.getDeltaTime();
+        worldPhysics = worldPhy;
+        bulletBody = shipBody;
         dx = MathUtils.cos(radians)* speed;
         dy = MathUtils.sin(radians)* speed;
         bulletSprite = new Sprite(bulletTexture);
-        bulletSprite.setPosition(x,y);
-        worldPhysics = new World(new Vector2(0f,0f),true );
+        bulletSprite.setPosition(x+18,y+18);
+         bulletSprite.setOrigin(bulletSprite.getWidth()/2, bulletSprite.getHeight()/2);
 
-        bulletSprite.setOrigin(bulletSprite.getWidth()/2, bulletSprite.getHeight()/2);
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set((bulletSprite.getX() + bulletSprite.getWidth()/2/100),
-                (bulletSprite.getY() + bulletSprite.getHeight()/2)/100);
-
-        bulletBody = worldPhysics.createBody(bodyDef);
-        bulletBody.setLinearDamping(1);
-        bulletBody.setAngularDamping(1);
-
-        bulletHitbox = new PolygonShape();
-        bulletHitbox.setAsBox((bulletSprite.getWidth()/2) / 100,
-                (bulletSprite.getHeight()/2)/100);
-        FixtureDef fixDef = new FixtureDef();
-        fixDef.shape = bulletHitbox;
-        fixDef.density = 0.1f;
-        fixDef.friction = 10f;
-
-        bulletBody.createFixture(fixDef);
+        setHitBox();
+        hitbox.dispose();
 
 
     }
@@ -59,73 +47,32 @@ public class Bullet implements Screen {
     public void updateBullet(){
         bulletSprite.translate(dx, dy);
         time = time + dt;
+        worldPhysics.destroyBody(body);
+         setHitBox();
 
-    }
-
-    public float returnTime(){
-        return dt;
-    }
-
-    @Override
-    public void show() {
-
-    }
-
-    @Override
-    public void render(float delta) {
-        worldPhysics = new World(new Vector2(0f,0f), true);
-        BodyDef bulletBodyDef = new BodyDef();
-        bulletBodyDef.type = BodyDef.BodyType.DynamicBody;
-        bulletBodyDef.bullet = true;
-        bulletBodyDef.position.set(x/100,y/100);
-        //     bulletBodyDef.position.set(300,300);
-
-        bulletBody = worldPhysics.createBody(bulletBodyDef);
-        bulletHitbox = new PolygonShape();
-        bulletHitbox.setAsBox((bulletSprite.getWidth()/2)/100, (bulletSprite.getHeight()/2)/100);
-        FixtureDef fixtureDefBullet = new FixtureDef();
-        fixtureDefBullet.shape = bulletHitbox;
-        fixtureDefBullet.density = 0.01f;
-        bulletBody.createFixture(fixtureDefBullet);
-
-        bulletSprite.setPosition((bulletBody.getPosition().x * 100) - ( bulletSprite.getWidth()/2 ),
-                (bulletBody.getPosition().y * 100) - ( bulletSprite.getHeight()/2 ));
-        bulletSprite.setRotation((float) Math.toDegrees((bulletBody.getAngle())));
-
-        bulletHitbox.dispose();
-    }
-
-
-    public void renderBullet( ) {
-        worldPhysics.step(1f/150f , 6, 2);
-      //  wrapScreen.wrapScreen(playerSprite , shipBody);
+     }
 
 
 
-    }
+    private void setHitBox() { //Set up Hitbox for this asteroid using Box2D methods
+        BodyDef bodyDef = new BodyDef();
+        hitbox = new PolygonShape();
 
-    @Override
-    public void resize(int width, int height) {
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(((bulletSprite.getX() + bulletSprite.getWidth()/2)/100),
+                ( (bulletSprite.getY() + bulletSprite.getHeight()/2)/100)   );
+        body = worldPhysics.createBody(bodyDef);
+         hitbox.setAsBox((bulletSprite.getWidth()/2) / 100,
+                (bulletSprite.getHeight()/2)/100);
+        FixtureDef fixDefast = new FixtureDef();
+          fixDefast.shape = hitbox;
+        fixDefast.density = 0.1f;
+        fixDefast.friction = 10f;
+         fixDefast.filter.categoryBits = 0x0007;
+        fixDefast.filter.groupIndex = -1;
+        body.createFixture(fixDefast);
+         body.applyForceToCenter(bulletBody.getPosition().x,bulletBody.getPosition().y,true);
 
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-
+        body.applyTorque(0.09f,true);
     }
 }
