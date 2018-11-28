@@ -211,12 +211,12 @@ class Asteroid   {
         hitbox.setAsBox((sprite.getWidth()/2) / 100,
                 (sprite.getHeight()/2)/100);
         FixtureDef fixDefast = new FixtureDef();
-        fixDefast.filter.categoryBits = 0x0002;
-        fixDefast.filter.groupIndex = -1;
+          fixDefast.filter.groupIndex = -1;
         fixDefast.shape = hitbox;
         fixDefast.density = 0.1f;
         fixDefast.friction = 10f;
         body.createFixture(fixDefast);
+        body.setUserData("asteroid");
         System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
         body.applyForceToCenter(translateX,translateY+3,true);
         body.applyTorque(0.09f,true);

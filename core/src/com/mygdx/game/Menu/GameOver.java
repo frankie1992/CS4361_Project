@@ -4,26 +4,26 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.*;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MainMenu;
 
-import javax.swing.event.ChangeEvent;
-
-public class OptionMenu implements Screen {
+public class GameOver implements Screen {
 
     Game game;
     Stage stage;
     Skin skin;
-    float soundVolume;
-    Slider volume;
     Table table;
 
-    public OptionMenu(Game gamePass)
+    public GameOver(Game gamePass, int score)
     {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         table = new Table();
@@ -31,54 +31,41 @@ public class OptionMenu implements Screen {
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         //
-        Label gameTitle = new Label("Option",skin ,"default");
-        Label effectSound = new Label("Effect Sound",skin ,"default");
-        Label window = new Label("Window",skin ,"default");
-        Label mode = new Label("Game mode",skin ,"default");
+        Label gameTitle = new Label("Game Over",skin ,"default");
+        Label finalScore = new Label("Final Score " + score ,skin ,"default");
 
-        //
-        volume = new Slider(0,10f,1f,false,skin);
         gameTitle.setAlignment(Align.center);
         gameTitle.setHeight(Gdx.graphics.getHeight()* 1.5f);
         gameTitle.setWidth(Gdx.graphics.getWidth());
-         Group groupTitle = new Group();
-        groupTitle.addActor(gameTitle);
+           TextButton backButton = new TextButton("Back",skin,"default");
 
         //
-
-        gameTitle.setAlignment(Align.center);
-        gameTitle.setHeight(Gdx.graphics.getHeight()* 1.9f);
-        gameTitle.setWidth(Gdx.graphics.getWidth());
-
-        //
-        table.add(effectSound).left();
-         table.add(volume).pad(10f).fillX().colspan(3);
+        table.add(gameTitle);
         table.row();
-        table.add(window);
+        table.add(finalScore);
         table.row();
-        table.add(mode);
+
+        table.add(backButton);
+
+
+
+        table.setHeight(Gdx.graphics.getHeight()* 1.6f);
+        table.setWidth(Gdx.graphics.getWidth());
+
+         stage.addActor(table);
+
+
+        //
 
 
 
         //
-        TextButton backButton = new TextButton("Back",skin,"default");
 
-
-
-        //
-        backButton.setWidth(200);
-        backButton.setHeight(100);
-        backButton.setPosition(100,100,Align.left);
 
 
         //
         backButton.setColor(0,0,0,1f);
 
-
-        //
-        table.align(Align.center|Align.top);
-        table.setHeight(Gdx.graphics.getHeight()* 0.6f);
-        table.setWidth(Gdx.graphics.getWidth());
 
         backButton.addListener(new InputListener()
         {
@@ -97,10 +84,7 @@ public class OptionMenu implements Screen {
         });
 
 
-
-        stage.addActor(table);
-        stage.addActor(groupTitle);
-        stage.addActor(backButton);
+        Gdx.input.setInputProcessor(stage);
 
     }
     @Override
@@ -112,8 +96,7 @@ public class OptionMenu implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        Gdx.input.setInputProcessor(stage);
-         stage.draw();
+        stage.draw();
     }
 
     @Override
@@ -140,17 +123,6 @@ public class OptionMenu implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-    }
-
-    public void setSoundVolume(float soundVolume)
-    {
-
-    }
-
-
-    public float getSoundVolume( )
-    {
-        return soundVolume;
     }
 
 }

@@ -1,13 +1,11 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
@@ -17,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.mygdx.game.Menu.GameOver;
 import com.mygdx.game.PlayerInput;
 import com.mygdx.game.WrapEffect;
 import java.util.ArrayList;
@@ -48,20 +47,23 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
     int gameScore = 0;
     int gameLives = 3;
     Table table;
-
+    BitmapFont bitmapFont;
     //Asteroid:
     Sprite sprite;
     Texture astroid;
     PolygonShape astoridhitbox;
     Body astoridBody;
-
-
+    String scoreTitle;
+    String livesTitle;
+    Label score;
+    Label lives;
     AsteroidSpawner spawner;
     String[] bigAsteroid = {"Asteroids/Big/Asteroid_Big1.png", "Asteroids/Big/Asteroid_Big2.png"};
     String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png","Asteroids/Med/Asteroid_Med2.png"};
     String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png","Asteroids/Small/Asteroid_Small2.png"};
-
-    public   AsteroidGame  () {
+    Game gameOverStae;
+    public   AsteroidGame  (Game game) {
+        gameOverStae = game;
         create();
     }
 
@@ -70,15 +72,18 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         table = new Table();
 
-        Label score = new Label("Score: " + gameScore,skin ,"default");
-        Label lives = new Label("Lives: " + gameLives,skin ,"default");
-        score.setWidth(200);
-        score.setHeight(100);
-        lives.setWidth(200);
-        lives.setHeight(100);
-        table.add(score);
-        table.row();
-        table.add(lives);
+          bitmapFont = new BitmapFont();
+        score = new Label("Score: " + gameScore,skin ,"default");
+        lives = new Label("Lives: " + gameLives,skin ,"default");
+        scoreTitle = "Score: 0";
+        livesTitle = "Lives: 3";
+        score.setWidth(100);
+        score.setHeight(800);
+        lives.setWidth(100);
+        lives.setHeight(700);
+       table.add(score);
+      table.row();
+       table.add(lives);
         table.setPosition(100,800);
 
 
@@ -87,9 +92,9 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         playerModel = new Texture("Player/shipTest.png");
         astroid = new Texture("Asteroids/Small/Asteroid_Small2.png");
 
-        shipSound = Gdx.audio.newSound(Gdx.files.internal("Player/ship_move2.wav"));
+        shipSound = Gdx.audio.newSound(Gdx.files.internal("Player/ship_move.wav"));
         bulletModel = new Texture("Laser/Bullet.png");
-        laserSound = Gdx.audio.newSound(Gdx.files.internal("Laser/laser_sound2.wav"));
+        laserSound = Gdx.audio.newSound(Gdx.files.internal("Laser/laser_sound.wav"));
         playerSprite = new Sprite(playerModel);
 
         sprite = new Sprite(astroid);
@@ -130,18 +135,18 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         fixDef.shape = shipHitbox;
         fixDef.density = 0.1f;
         fixDef.friction = 10f;
-        fixDef.filter.categoryBits = 0x0007;
-        fixDef.filter.groupIndex = -1;
+        fixDef.filter.groupIndex = 1;
+         shipBody.setUserData("ship");
+       // fixDef.filter.groupIndex = -1;
 
         shipBody.createFixture(fixDef);
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////    ASTEROID SPAWNER    /////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid, worldPhysics);
         // rocks
         renderer = new Box2DDebugRenderer();
-
+        collision();
           shipHitbox.dispose();
     }
     public void render () {
@@ -176,7 +181,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
         worldPhysics.step(1f/150f , 6, 2);
         wrapScreen.wrapScreen(playerSprite , shipBody);
-
+        collision();
         for(int i = 0; i < spawner.asteroidCount(); i++) { //Apply wrap effect for each asteroid
             wrapScreen.wrapScreen(spawner.getAsteroid(i).sprite, spawner.getAsteroid(i).body);
         }
@@ -200,7 +205,10 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
         dm = batch.getProjectionMatrix().cpy().scale(100f,100f,0);
         batch.begin();
-
+         bitmapFont.draw(batch, scoreTitle,100,800);
+        bitmapFont.draw(batch, livesTitle,100,750);
+        score.setText("Score: " + gameScore);
+        lives.setText("Lives: " + gameLives);
 
         playerSprite.draw(batch);
 
@@ -292,5 +300,48 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         shipSound.dispose();
          worldPhysics.dispose();
 
+    }
+
+
+    public void collision()
+    {
+        worldPhysics.setContactListener(new ContactListener() {
+            @Override
+            public void beginContact(Contact contact) {
+
+
+                if(contact.getFixtureA().getBody().getUserData()=="ship" && contact.getFixtureB().getBody().getUserData()=="asteroid"
+                        || contact.getFixtureA().getBody().getUserData()=="asteroid" && contact.getFixtureB().getBody().getUserData()=="ship")
+                {
+                    System.out.println("ship Contact");
+                      scoreTitle = "Score: " + ++gameScore ;
+                    livesTitle = "Lives: " + --gameLives ;
+                    if (gameLives <= 0)
+                    {
+                        gameOverStae.setScreen(new GameOver(gameOverStae, gameScore));
+
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void endContact(Contact contact) {
+
+
+
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {
+
+            }
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {
+
+            }
+        });
     }
 }

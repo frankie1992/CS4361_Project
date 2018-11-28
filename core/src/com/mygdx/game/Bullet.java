@@ -37,7 +37,6 @@ public class Bullet   {
         bulletSprite = new Sprite(bulletTexture);
         bulletSprite.setPosition(x+18,y+18);
          bulletSprite.setOrigin(bulletSprite.getWidth()/2, bulletSprite.getHeight()/2);
-
         setHitBox();
         hitbox.dispose();
 
@@ -68,11 +67,12 @@ public class Bullet   {
           fixDefast.shape = hitbox;
         fixDefast.density = 0.1f;
         fixDefast.friction = 10f;
-         fixDefast.filter.categoryBits = 0x0007;
-        fixDefast.filter.groupIndex = -1;
+        fixDefast.filter.groupIndex = 1;
+        bulletBody.isBullet();
+        bulletBody.setUserData("bullet");
+
         body.createFixture(fixDefast);
          body.applyForceToCenter(bulletBody.getPosition().x,bulletBody.getPosition().y,true);
 
-        body.applyTorque(0.09f,true);
-    }
+     }
 }

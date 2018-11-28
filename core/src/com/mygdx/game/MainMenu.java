@@ -36,6 +36,8 @@ public class MainMenu implements Screen
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         //
         Label gameTitle = new Label("ASTEROIDS",skin ,"default");
+
+
         gameTitle.setAlignment(Align.center);
         gameTitle.setHeight(Gdx.graphics.getHeight()* 1.5f);
         gameTitle.setWidth(Gdx.graphics.getWidth());
@@ -99,7 +101,7 @@ public class MainMenu implements Screen
                 exitButton.setTouchable(Touchable.disabled);
                 highscoreButton.setTouchable(Touchable.disabled);
 
-                game.setScreen(new AsteroidGame(  ));
+                game.setScreen(new AsteroidGame( game ));
             }
 
 
