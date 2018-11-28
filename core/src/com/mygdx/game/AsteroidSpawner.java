@@ -164,9 +164,9 @@ class Asteroid   {
     private void wrapScreen()
     {
         // Left bounds limit
-        if (sprite.getX()<= -50 )
-        {
+        if (sprite.getX()<= -50 ) {
             sprite.translateX(Gdx.graphics.getWidth());
+        }
 
     }
 
