@@ -41,6 +41,10 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
     PolygonShape shipHitbox;
     Box2DDebugRenderer renderer;
     Matrix4 dm;
+    Body bulletBody;
+    PolygonShape bulletHitbox;
+    float speed, translateX, translateY, rotation;
+    World worldphysics;
 
 
 
