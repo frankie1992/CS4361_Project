@@ -121,8 +121,8 @@ class Asteroid   {
 
         //Set spawn conditions
         sprite.rotate(rotation);
-        int x = rand.nextInt(20);
-        int y = rand.nextInt(20);
+        int x = rand.nextInt(200); //x: 0 to 200
+        int y = rand.nextInt(200); //y: 0 to 200
         sprite.setPosition(x,y);
         sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
         setHitBox();
@@ -161,20 +161,8 @@ class Asteroid   {
         sprite.setRotation((float) Math.toDegrees((body.getAngle())));
     }
 
-    private void wrapScreen()
-    {
-        // Left bounds limit
-        if (sprite.getX()<= -50 ) {
-            sprite.translateX(Gdx.graphics.getWidth());
-        }
-
-    }
-
-
-
     public void destroyFrom(AsteroidSpawner spawner) { //When hit, asteroid is removed from list
         if(size-1 == 0) {
-            //hitbox.dispose();
             spawner.asteroids.remove(this);//Remove asteroid
             physics.destroyBody(body);
 
@@ -206,7 +194,6 @@ class Asteroid   {
             default:
                 return;
         }
-        //hitbox.dispose(); //Remove hitbox after splitting
         spawner.asteroids.add(a1);
         spawner.asteroids.add(a2);
         spawner.asteroids.remove(this); //Remove after splitting
@@ -228,7 +215,7 @@ class Asteroid   {
         fixDefast.density = 0.1f;
         fixDefast.friction = 10f;
         body.createFixture(fixDefast);
-        System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
+        //System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
         body.applyForceToCenter(translateX,translateY+3,true);
         body.applyTorque(0.09f,true);
     }
