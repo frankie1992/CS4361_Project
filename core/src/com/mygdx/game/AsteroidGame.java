@@ -46,7 +46,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
     Skin skin;
     int gameScore = 0;
-    int gameLives = 3;
+    int gameLives = 20;
     Table table;
     BitmapFont bitmapFont;
     //Asteroid:
@@ -59,7 +59,9 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
     Label score;
     Label lives;
     AsteroidSpawner spawner;
-    String[] bigAsteroid = {"Asteroids/Big/Asteroid_Big1.png", "Asteroids/Big/Asteroid_Big2.png"};
+    String[] bigAsteroid = {"Asteroids/Big/temoc.png", "Asteroids/Big/temoc.png"};
+
+ //   String[] bigAsteroid = {"Asteroids/Big/temoc.png", "Asteroids/Big/A.png"};
     String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png", "Asteroids/Med/Asteroid_Med2.png"};
     String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png", "Asteroids/Small/Asteroid_Small2.png"};
     Game gameOverStae;
@@ -74,8 +76,8 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         table = new Table();
 
         bitmapFont = new BitmapFont();
-        score = new Label("Score: " + gameScore, skin, "default");
-        lives = new Label("Lives: " + gameLives, skin, "default");
+        score = new Label("   Score: " + gameScore, skin, "default");
+        lives = new Label("   Lives: " + gameLives, skin, "default");
         scoreTitle = "Score: 0";
         livesTitle = "Lives: 3";
         score.setWidth(100);
@@ -116,7 +118,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         wrapScreen = new WrapEffect();
 
 
-        worldPhysics = new World(new Vector2(0f, 0f), true);
+        worldPhysics = new World(new Vector2(0f, -9.8f), true);
 
         // Ship
         BodyDef bodydefination = new BodyDef();
@@ -209,8 +211,9 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         batch.begin();
         bitmapFont.draw(batch, scoreTitle, 100, 800);
         bitmapFont.draw(batch, livesTitle, 100, 750);
-        score.setText("Score: " + gameScore);
-        lives.setText("Lives: " + gameLives);
+        score.setText("  Score: " + gameScore);
+        lives.setText("  Hits: " + gameLives);
+        gameScore++;
 
         playerSprite.draw(batch);
 
@@ -305,7 +308,12 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
                     }
 
                     // Remove
-                    removeAsteroid.add(contact.getFixtureB().getBody());
+                    //removeAsteroid.add(contact.getFixtureB().getBody());  Gdx.app.postRunnable(new Runnable() {
+                    //                        @Override
+                    //                        public void run() {
+                    //                            worldPhysics.destroyBody(contact.getFixtureB().getBody());
+                    //                        }
+                    //                    });
 
 
                 }

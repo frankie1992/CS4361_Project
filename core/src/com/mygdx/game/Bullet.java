@@ -69,7 +69,7 @@ public class Bullet   {
         fixDefast.friction = 10f;
         fixDefast.filter.groupIndex = -2;
         bulletBody.isBullet();
-       // bulletBody.setUserData("bullet");
+     //   bulletBody.setUserData("bullet");
 
         body.createFixture(fixDefast);
          body.applyForceToCenter(bulletBody.getPosition().x,bulletBody.getPosition().y,true);
