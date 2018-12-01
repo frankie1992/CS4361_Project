@@ -72,6 +72,8 @@ public class PlayerInput {
             shipBody.applyForceToCenter(x,y,true);
            // astoridBody.applyForceToCenter(10,10,true);
          }
+         else
+             shipSound.stop();
 
 
         // Move the ship to a new random position
