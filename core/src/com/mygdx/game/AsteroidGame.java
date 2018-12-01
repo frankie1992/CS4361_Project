@@ -157,6 +157,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         // rocks
         renderer = new Box2DDebugRenderer();
         collision();
+        spawner.collisionCheck();
         shipHitbox.dispose();
     }
 
@@ -194,6 +195,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         worldPhysics.step(1f / 150f, 6, 2);
         wrapScreen.wrapScreen(playerSprite, shipBody);
         collision();
+        spawner.collisionCheck();
         for (int i = 0; i < spawner.asteroidCount(); i++) { //Apply wrap effect for each asteroid
             wrapScreen.wrapScreen(spawner.getAsteroid(i).sprite, spawner.getAsteroid(i).body);
         }
@@ -304,8 +306,8 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         worldPhysics.setContactListener(new ContactListener() {
             @Override
             public void beginContact(Contact contact) {
-                System.out.print("Fixture A: " + contact.getFixtureA().getBody().getUserData());
-                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
+//                System.out.print("Fixture A: " + contact.getFixtureA().getBody().getUserData());
+//                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
                 if (contact.getFixtureA().getBody().getUserData() == "ship" && contact.getFixtureB().getBody().getUserData() == "asteroid") {
                     System.out.println("ship Contact");
                     scoreTitle = "Score: " + ++gameScore;

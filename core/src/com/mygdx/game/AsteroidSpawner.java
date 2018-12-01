@@ -46,7 +46,7 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
     public void trySpawn() { //Spawns asteroid with random rotation
         currentTime += Gdx.graphics.getDeltaTime(); //advance time
         if (waveIsReady() && asteroidCount() < max) {
-            asteroids.add(new Asteroid(bigModels, physics));
+            asteroids.add(new Asteroid(bigModels, physics, this));
         }
     }
 
@@ -71,6 +71,12 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
         }
     }
 
+    public void collisionCheck() {
+        for(int i = 0; i < asteroidCount(); i++) {
+            getAsteroid(i).checkCollision(this);
+        }
+    }
+
     public Asteroid getAsteroid(int i) { //Returns asteroid of given index, if not null
         Asteroid a = asteroids.get(i);
         if (a != null) {
@@ -89,6 +95,8 @@ class Asteroid   {
     //Attributes:
     float speed, translateX, translateY, rotation;
     int size; //Determines whether it can be split
+    boolean dead = false; //When asteroid should be split or destroyed
+    AsteroidSpawner spawner;
 
     //Sprites:
     SpriteBatch batch;
@@ -100,7 +108,8 @@ class Asteroid   {
     Body body;
     Box2DDebugRenderer renderer;
     Matrix4 dm;
-    public Asteroid(List<Texture> models, World phys) { //Default spawn
+    public Asteroid(List<Texture> models, World phys, AsteroidSpawner a) { //Default spawn
+        spawner = a;
         size = 3; //Big asteroid
         batch = new SpriteBatch();
         physics = phys;
@@ -123,7 +132,8 @@ class Asteroid   {
         hitbox.dispose();
     }
 
-    public Asteroid(List<Texture> models, int si, float sp, float x, float y, float rot, World phys) { //If spawned from parent asteroid
+    public Asteroid(List<Texture> models, int si, float sp, float x, float y, float rot, World phys, AsteroidSpawner a) { //If spawned from parent asteroid
+        spawner = a;
         physics = phys;
         size = si;
         if(size == 0) {
@@ -148,45 +158,71 @@ class Asteroid   {
     }
 
     public void move() {
-        //sprite.translate(translateX, translateY);
-        //wrapScreen();
+        if(dead) this.destroyFrom(spawner);
         sprite.setPosition((body.getPosition().x * 100) - ( sprite.getWidth()/2),
                 (body.getPosition().y * 100) - ( sprite.getHeight()/2 ));
         sprite.setRotation((float) Math.toDegrees((body.getAngle())));
 
     }
 
+    public void checkCollision(AsteroidSpawner spawner) {
+        physics.setContactListener(new ContactListener() {
+            public void beginContact(Contact contact) {
+//                System.out.print("Fixture A: " + contact.getFixtureA().getBody().getUserData());
+//                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
+                if (contact.getFixtureA().getBody().getUserData() == "asteroid") {
+                    if(contact.getFixtureB().getBody().getUserData() == "bullet") { //Bullet hits asteroid
+                        System.out.println("ASTEROID HIT BY BULLET");
+                        dead = true;
+                    }
+                    else if(contact.getFixtureB().getBody().getUserData() == "ship") { //Player hits asteroid
+                        dead = true;
+                    }
+                }
+            }
+            @Override
+            public void endContact(Contact contact) {
 
 
-    public void destroyFrom(AsteroidSpawner spawner) { //When hit, asteroid is removed from list
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {}
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {}
+        }); //END setContactListener
+    } //END OF checkCollision
+
+    public void destroyFrom(AsteroidSpawner a) { //When hit, asteroid is removed from list
         if(size-1 == 0) {
             //hitbox.dispose();
-            spawner.asteroids.remove(this);//Remove asteroid
+            a.asteroids.remove(this);//Remove asteroid
             physics.destroyBody(body);
 
             //System.out.println("Asteroid Destroyed");
         }
         else //if asteroid can be split
         {
-            split(spawner);
+            split();
             physics.destroyBody(body);
 
 
         }
     }
 
-    public void split(AsteroidSpawner spawner) { //Split asteroid when hit
+    private void split() { //Split asteroid when hit
         Asteroid a1, a2;
         float speedUp = speed*0.3f;
         float angle = 45f;
         switch(size) {
             case 3: //Big Asteroid
-                a1 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle, physics);
-                a2 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle, physics);
+                a1 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle, physics, spawner);
+                a2 = new Asteroid(spawner.medModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle, physics, spawner);
                 break;
             case 2: //Medium Asteroid
-                a1 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle, physics);
-                a2 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle, physics);
+                a1 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation + angle, physics, spawner);
+                a2 = new Asteroid(spawner.smallModels, size-1, speedUp, sprite.getX(), sprite.getY(), rotation - angle, physics, spawner);
                 break;
             case 1: //Small Asteroid -- do nothing
             default:
@@ -213,7 +249,7 @@ class Asteroid   {
           fixDefast.filter.groupIndex = -1;
         fixDefast.shape = hitbox;
         fixDefast.density = 0.1f;
-        fixDefast.friction = 10f;
+        fixDefast.friction = 0f;
         body.createFixture(fixDefast);
         body.setUserData("asteroid");
         //System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
