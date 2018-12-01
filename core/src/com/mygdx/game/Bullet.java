@@ -31,12 +31,13 @@ public class Bullet   {
         this.bulletTexture = bulletTexture;
         this.dt = Gdx.graphics.getDeltaTime();
         worldPhysics = worldPhy;
-        bulletBody = shipBody;
+        //bulletBody = shipBody;
         dx = MathUtils.cos(radians)* speed;
         dy = MathUtils.sin(radians)* speed;
         bulletSprite = new Sprite(bulletTexture);
         bulletSprite.setPosition(x+18,y+18);
          bulletSprite.setOrigin(bulletSprite.getWidth()/2, bulletSprite.getHeight()/2);
+        copyBody(shipBody);
         setHitBox();
         hitbox.dispose();
 
@@ -47,13 +48,32 @@ public class Bullet   {
         bulletSprite.translate(dx, dy);
         time = time + dt;
         worldPhysics.destroyBody(body);
-         setHitBox();
+        setHitBox();
 
      }
 
+     private void copyBody(Body b) {
+         BodyDef bodydefination = new BodyDef();
+         bodydefination.type = BodyDef.BodyType.DynamicBody;
+         //bodydefination.position.set(b.getPosition());
+         body = worldPhysics.createBody(bodydefination);
+         body.setLinearDamping(b.getLinearDamping());
+         body.setAngularDamping(b.getAngularDamping());
+         body.isFixedRotation();
 
+         hitbox = new PolygonShape();
+         hitbox.setAsBox((bulletSprite.getWidth() / 2) / 100,
+                 (bulletSprite.getHeight() / 2) / 100);
+         FixtureDef fixDef = new FixtureDef();
+         fixDef.shape = hitbox;
+         fixDef.density = 0.1f;
+         fixDef.friction = 10f;
+         fixDef.filter.groupIndex = -2;
+         body.setUserData("bullet");
+         body.createFixture(fixDef);
+     }
 
-    private void setHitBox() { //Set up Hitbox for this asteroid using Box2D methods
+    private void setHitBox() { //Set up Hitbox for Bullet using Box2D methods
         BodyDef bodyDef = new BodyDef();
         hitbox = new PolygonShape();
 
@@ -68,11 +88,11 @@ public class Bullet   {
         fixDefast.density = 0.1f;
         fixDefast.friction = 10f;
         fixDefast.filter.groupIndex = -2;
-        bulletBody.isBullet();
-     //   bulletBody.setUserData("bullet");
+        body.isBullet();
+        body.setUserData("bullet");
 
         body.createFixture(fixDefast);
-         body.applyForceToCenter(bulletBody.getPosition().x,bulletBody.getPosition().y,true);
+         body.applyForceToCenter(body.getPosition().x,body.getPosition().y,true);
 
      }
 }

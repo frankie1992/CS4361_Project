@@ -91,7 +91,7 @@ public class PlayerInput {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
         {
             Bullet bullet = new Bullet(playerSprite.getX(),playerSprite.getY(),8,(float)Math.toRadians(playerSprite.getRotation()), bulletTexture, shipBody, Physics  );
-            laserSound.play(1f);
+            laserSound.play(0.5f);
             return bullet;
         }
 

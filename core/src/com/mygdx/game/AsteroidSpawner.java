@@ -65,7 +65,7 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
     public void moveAll() { //Moves asteroid in set direction after spawning
         for(int i = 0; i < asteroidCount(); i++) {
             getAsteroid(i).move();
-            if(Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
+            if(Gdx.input.isKeyJustPressed(Input.Keys.Z)) { //Press 'Z' to destroy asteroids
                 getAsteroid(i).destroyFrom(this);
             }
         }
@@ -192,7 +192,6 @@ class Asteroid   {
             default:
                 return;
         }
-        // hitbox.dispose(); //Remove hitbox after splitting
         spawner.asteroids.add(a1);
         spawner.asteroids.add(a2);
         spawner.asteroids.remove(this); //Remove after splitting
@@ -217,7 +216,7 @@ class Asteroid   {
         fixDefast.friction = 10f;
         body.createFixture(fixDefast);
         body.setUserData("asteroid");
-        System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
+        //System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
         body.applyForceToCenter(translateX,translateY+3,true);
         body.applyTorque(0.09f,true);
         body.setLinearDamping(1);

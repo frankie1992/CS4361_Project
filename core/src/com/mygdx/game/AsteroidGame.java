@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Random;
 
 public class AsteroidGame  extends ApplicationAdapter implements Screen {
+    Boolean temocOn = false;
     SpriteBatch batch;
     Texture playerModel;
     Texture bulletModel;
@@ -59,9 +60,8 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
     Label score;
     Label lives;
     AsteroidSpawner spawner;
-    String[] bigAsteroid = {"Asteroids/Big/temoc.png", "Asteroids/Big/temoc.png"};
-
- //   String[] bigAsteroid = {"Asteroids/Big/temoc.png", "Asteroids/Big/A.png"};
+    String[] temocSprite = {"Asteroids/Big/temoc.png", "Asteroids/Big/temoc.png"};
+    String[] bigAsteroid = {"Asteroids/Big/Asteroid_Big1.png", "Asteroids/Big/Asteroid_Big2.png"};
     String[] medAsteroid = {"Asteroids/Med/Asteroid_Med1.png", "Asteroids/Med/Asteroid_Med2.png"};
     String[] smallAsteroid = {"Asteroids/Small/Asteroid_Small1.png", "Asteroids/Small/Asteroid_Small2.png"};
     Game gameOverStae;
@@ -117,8 +117,12 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         input = new PlayerInput();
         wrapScreen = new WrapEffect();
 
-
-        worldPhysics = new World(new Vector2(0f, -9.8f), true);
+        if(temocOn) {
+            worldPhysics = new World(new Vector2(0f, -9.8f), true); //TEMOC MODE
+        }
+        else {
+            worldPhysics = new World(new Vector2(0f, 0f), true); //DEFAULT MODE
+        }
 
         // Ship
         BodyDef bodydefination = new BodyDef();
@@ -145,7 +149,11 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////    ASTEROID SPAWNER    /////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
-        spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid, worldPhysics);
+        if(temocOn) {
+            spawner = new AsteroidSpawner(temocSprite, medAsteroid, smallAsteroid, worldPhysics);
+        }
+        else
+            spawner = new AsteroidSpawner(bigAsteroid, medAsteroid, smallAsteroid, worldPhysics);
         // rocks
         renderer = new Box2DDebugRenderer();
         collision();
@@ -156,7 +164,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
     }
 
-    public void createAstroid(Sprite sprt, PolygonShape hitbox, Body body) {
+    /**public void createAstroid(Sprite sprt, PolygonShape hitbox, Body body) {
         BodyDef bodyDef1 = new BodyDef();
         bodyDef1.type = BodyDef.BodyType.DynamicBody;
         bodyDef1.position.set(((sprt.getX() + sprt.getWidth() / 2) / 100),
@@ -172,7 +180,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         body.createFixture(fix);
         body.setLinearDamping(0.5f);
         body.setAngularDamping(1f);
-    }
+    }*/
 
     @Override
     public void show() {
@@ -296,8 +304,8 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         worldPhysics.setContactListener(new ContactListener() {
             @Override
             public void beginContact(Contact contact) {
-
-
+                System.out.print("Fixture A: " + contact.getFixtureA().getBody().getUserData());
+                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
                 if (contact.getFixtureA().getBody().getUserData() == "ship" && contact.getFixtureB().getBody().getUserData() == "asteroid") {
                     System.out.println("ship Contact");
                     scoreTitle = "Score: " + ++gameScore;
