@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
-    int max = 1; //Max asteroids that will spawn this wave
+    int max = 2; //Max asteroids that will spawn this wave
     int toSpawn = max; //Asteroids left to spawn during wave
     List<Texture> bigModels = new ArrayList<Texture>(); //Asteroids spawn using big models
     List<Texture> medModels = new ArrayList<Texture>(); //Asteroids split into medium models
@@ -64,8 +64,7 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
     private boolean spawnIsReady() {
         if(currentTime > nextSpawn) {
             nextSpawn += spawnWait; //nextSpawn set time is set
-            //spawnWait /= 2; //time between waves decreases
-            System.out.println("Next Wave! (@ " + currentTime + " sec)");
+            destroyAsteroids.clear(); //No memory leaks, please!
             return true;
         }
         else {
@@ -79,23 +78,27 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
             if(Gdx.input.isKeyJustPressed(Input.Keys.Z)) { //Press 'Z' to destroy asteroids
                 getAsteroid(i).destroyFrom(this);
             }
-            destroyAsteroids.clear();
         }
     }
 
     public void collisionCheck() {
         physics.setContactListener(new ContactListener() {
             public void beginContact(Contact contact) {
-//                System.out.print("Fixture A: " + contact.getFixtureA().getBody().getUserData());
-//                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
-                if (contact.getFixtureA().getBody().getUserData() == "asteroid") {
-                    Body asteroid = contact.getFixtureA().getBody();
-                    if(contact.getFixtureB().getBody().getUserData() == "bullet") { //Bullet hits asteroid
-                        destroyAsteroids.add(asteroid); //Asteroid will be removed next frame
+                Body objA = contact.getFixtureA().getBody();
+                Body objB = contact.getFixtureB().getBody();
+                if (objA.getUserData() == "asteroid") {
+                    if(objB.getUserData() == "bullet") { //Asteroid hits bullet
+                        destroyAsteroids.add(objA); //Asteroid will be removed next frame
                         //System.out.println("Destroying: " + asteroid.getUserData());
                     }
-                    else if(contact.getFixtureB().getBody().getUserData() == "ship") { //Player hits asteroid
+                    else if(objB.getUserData() == "ship") { //Player hits asteroid
                         destroyAsteroids.add(contact.getFixtureB().getBody()); //Asteroid will be removed next frame
+                    }
+                }
+                else if (objA.getUserData() == "bullet") {
+                    if(objB.getUserData() == "asteroid") { //Bullet hits asteroid
+                        destroyAsteroids.add(objB);
+                        System.out.println("BULLET HIT ASTEROID");
                     }
                 }
             }
@@ -142,7 +145,6 @@ class Asteroid   {
     PolygonShape hitbox;
     Body body;
     Box2DDebugRenderer renderer;
-    Matrix4 dm;
     public Asteroid(List<Texture> models, World phys, AsteroidSpawner a) { //Default spawn
         spawner = a;
         size = 3; //Big asteroid
@@ -206,6 +208,7 @@ class Asteroid   {
     private boolean asteroidRemoved() { //Checks if this asteroid should be removed
         if(spawner.destroyAsteroids.contains(body)) {
             System.out.println("ASTEROID DESTROYED");
+            spawner.destroyAsteroids.remove(body);
             return true;
         }
         else return false;
@@ -267,6 +270,7 @@ class Asteroid   {
         fixDefast.shape = hitbox;
         fixDefast.density = 0.1f;
         fixDefast.friction = 0f;
+        fixDefast.isSensor = true;
         body.createFixture(fixDefast);
         body.setUserData("asteroid");
         //System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
