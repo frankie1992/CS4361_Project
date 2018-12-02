@@ -98,7 +98,7 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
                 else if (objA.getUserData() == "bullet") {
                     if(objB.getUserData() == "asteroid") { //Bullet hits asteroid
                         destroyAsteroids.add(objB);
-                        System.out.println("BULLET HIT ASTEROID");
+                        //System.out.println("BULLET HIT ASTEROID");
                     }
                 }
             }
