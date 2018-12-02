@@ -19,14 +19,16 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
-    int max = 20; //maximum amount of asteroids that will be spawned
+    int max = 1; //Max asteroids that will spawn this wave
+    int toSpawn = max; //Asteroids left to spawn during wave
     List<Texture> bigModels = new ArrayList<Texture>(); //Asteroids spawn using big models
     List<Texture> medModels = new ArrayList<Texture>(); //Asteroids split into medium models
     List<Texture> smallModels = new ArrayList<Texture>(); //Asteroids split into small models, and can be destroyed
-    List<Asteroid> asteroids = new ArrayList<Asteroid>();
-    float currentTime = 0f; //seconds that have passed since game start
-    float nextSpawn = 5f;   //spawn asteroids when currentTime is greater
+    List<Asteroid> asteroids = new ArrayList<Asteroid>(); //Active asteroids on screen
+    List<Body> destroyAsteroids = new ArrayList<Body>(); //Asteroids to be destroyed (when body is removed)
+    private float currentTime = 0f; //seconds that have passed since game start
     float spawnWait = 5f;   //seconds between waves
+    private float nextSpawn = currentTime + spawnWait;   //spawn asteroids when currentTime is greater
     World physics;
 
 
@@ -45,12 +47,21 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
 
     public void trySpawn() { //Spawns asteroid with random rotation
         currentTime += Gdx.graphics.getDeltaTime(); //advance time
-        if (waveIsReady() && asteroidCount() < max) {
+        if (spawnIsReady() && toSpawn > 0) {
             asteroids.add(new Asteroid(bigModels, physics, this));
+            toSpawn--;
+        }
+
+        else if(toSpawn <= 0 && asteroidCount() == 0) {
+            System.out.println("NEXT WAVE!");
+            max += 2; //More asteroids will spawn
+            toSpawn = max;
+            spawnWait *= 0.9f; //Wait time between spawns is shorter
+
         }
     }
 
-    private boolean waveIsReady() {
+    private boolean spawnIsReady() {
         if(currentTime > nextSpawn) {
             nextSpawn += spawnWait; //nextSpawn set time is set
             //spawnWait /= 2; //time between waves decreases
@@ -68,14 +79,39 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
             if(Gdx.input.isKeyJustPressed(Input.Keys.Z)) { //Press 'Z' to destroy asteroids
                 getAsteroid(i).destroyFrom(this);
             }
+            destroyAsteroids.clear();
         }
     }
 
     public void collisionCheck() {
-        for(int i = 0; i < asteroidCount(); i++) {
-            getAsteroid(i).checkCollision(this);
-        }
-    }
+        physics.setContactListener(new ContactListener() {
+            public void beginContact(Contact contact) {
+//                System.out.print("Fixture A: " + contact.getFixtureA().getBody().getUserData());
+//                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
+                if (contact.getFixtureA().getBody().getUserData() == "asteroid") {
+                    Body asteroid = contact.getFixtureA().getBody();
+                    if(contact.getFixtureB().getBody().getUserData() == "bullet") { //Bullet hits asteroid
+                        destroyAsteroids.add(asteroid); //Asteroid will be removed next frame
+                        //System.out.println("Destroying: " + asteroid.getUserData());
+                    }
+                    else if(contact.getFixtureB().getBody().getUserData() == "ship") { //Player hits asteroid
+                        destroyAsteroids.add(contact.getFixtureB().getBody()); //Asteroid will be removed next frame
+                    }
+                }
+            }
+            @Override
+            public void endContact(Contact contact) {
+
+
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {}
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {}
+        }); //END setContactListener
+    } //END OF checkCollision
 
     public Asteroid getAsteroid(int i) { //Returns asteroid of given index, if not null
         Asteroid a = asteroids.get(i);
@@ -95,7 +131,6 @@ class Asteroid   {
     //Attributes:
     float speed, translateX, translateY, rotation;
     int size; //Determines whether it can be split
-    boolean dead = false; //When asteroid should be split or destroyed
     AsteroidSpawner spawner;
 
     //Sprites:
@@ -132,7 +167,7 @@ class Asteroid   {
         hitbox.dispose();
     }
 
-    public Asteroid(List<Texture> models, int si, float sp, float x, float y, float rot, World phys, AsteroidSpawner a) { //If spawned from parent asteroid
+    private Asteroid(List<Texture> models, int si, float sp, float x, float y, float rot, World phys, AsteroidSpawner a) { //If spawned from parent asteroid
         spawner = a;
         physics = phys;
         size = si;
@@ -158,41 +193,23 @@ class Asteroid   {
     }
 
     public void move() {
-        if(dead) this.destroyFrom(spawner);
+        if(asteroidRemoved()) {
+            this.destroyFrom(spawner);
+            return;
+        }
         sprite.setPosition((body.getPosition().x * 100) - ( sprite.getWidth()/2),
                 (body.getPosition().y * 100) - ( sprite.getHeight()/2 ));
         sprite.setRotation((float) Math.toDegrees((body.getAngle())));
 
     }
 
-    public void checkCollision(AsteroidSpawner spawner) {
-        physics.setContactListener(new ContactListener() {
-            public void beginContact(Contact contact) {
-//                System.out.print("Fixture A: " + contact.getFixtureA().getBody().getUserData());
-//                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
-                if (contact.getFixtureA().getBody().getUserData() == "asteroid") {
-                    if(contact.getFixtureB().getBody().getUserData() == "bullet") { //Bullet hits asteroid
-                        System.out.println("ASTEROID HIT BY BULLET");
-                        dead = true;
-                    }
-                    else if(contact.getFixtureB().getBody().getUserData() == "ship") { //Player hits asteroid
-                        dead = true;
-                    }
-                }
-            }
-            @Override
-            public void endContact(Contact contact) {
-
-
-            }
-
-            @Override
-            public void preSolve(Contact contact, Manifold oldManifold) {}
-
-            @Override
-            public void postSolve(Contact contact, ContactImpulse impulse) {}
-        }); //END setContactListener
-    } //END OF checkCollision
+    private boolean asteroidRemoved() { //Checks if this asteroid should be removed
+        if(spawner.destroyAsteroids.contains(body)) {
+            System.out.println("ASTEROID DESTROYED");
+            return true;
+        }
+        else return false;
+    }
 
     public void destroyFrom(AsteroidSpawner a) { //When hit, asteroid is removed from list
         if(size-1 == 0) {
@@ -246,7 +263,7 @@ class Asteroid   {
         hitbox.setAsBox((sprite.getWidth()/2) / 100,
                 (sprite.getHeight()/2)/100);
         FixtureDef fixDefast = new FixtureDef();
-          fixDefast.filter.groupIndex = -1;
+        fixDefast.filter.groupIndex = -1;
         fixDefast.shape = hitbox;
         fixDefast.density = 0.1f;
         fixDefast.friction = 0f;
@@ -255,6 +272,6 @@ class Asteroid   {
         //System.out.println("Apply Force: (" + translateX + ", " + translateY + ")");
         body.applyForceToCenter(translateX,translateY+3,true);
         body.applyTorque(0.09f,true);
-        body.setLinearDamping(1);
+        body.setLinearDamping(0);
     }
 }
