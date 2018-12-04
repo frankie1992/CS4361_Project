@@ -19,17 +19,18 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AsteroidSpawner { //Spawns asteroid in game with random initial direction
-    int max = 2; //Max asteroids that will spawn this wave
-    int toSpawn = max; //Asteroids left to spawn during wave
+    private int max = 5; //Max asteroids that will spawn this wave
+    private int toSpawn = max; //Asteroids left to spawn during wave
+    private int score = 0;
     List<Texture> bigModels = new ArrayList<Texture>(); //Asteroids spawn using big models
     List<Texture> medModels = new ArrayList<Texture>(); //Asteroids split into medium models
     List<Texture> smallModels = new ArrayList<Texture>(); //Asteroids split into small models, and can be destroyed
     List<Asteroid> asteroids = new ArrayList<Asteroid>(); //Active asteroids on screen
     List<Body> destroyAsteroids = new ArrayList<Body>(); //Asteroids to be destroyed (when body is removed)
     private float currentTime = 0f; //seconds that have passed since game start
-    float spawnWait = 5f;   //seconds between waves
+    private float spawnWait = 5f;   //seconds between waves
     private float nextSpawn = currentTime + spawnWait;   //spawn asteroids when currentTime is greater
-    World physics;
+    private World physics;
 
 
     AsteroidSpawner(String[] b, String[] m, String[] s, World phys) { //Paths for small, medium, and big asteroids given
@@ -128,6 +129,12 @@ public class AsteroidSpawner { //Spawns asteroid in game with random initial dir
     }
 
     public int asteroidCount() {return asteroids.size();}
+
+    public int getScore() {return score;}
+    public void addScore(int s) {
+        score += s;
+        System.out.println("+" + s + " points!");
+    }
 }
 
 class Asteroid   {
@@ -207,7 +214,7 @@ class Asteroid   {
 
     private boolean asteroidRemoved() { //Checks if this asteroid should be removed
         if(spawner.destroyAsteroids.contains(body)) {
-            System.out.println("ASTEROID DESTROYED");
+            //System.out.println("ASTEROID DESTROYED");
             spawner.destroyAsteroids.remove(body);
             return true;
         }
@@ -215,8 +222,19 @@ class Asteroid   {
     }
 
     public void destroyFrom(AsteroidSpawner a) { //When hit, asteroid is removed from list
+        switch(size) {
+            case 3: //Big Asteroid
+                spawner.addScore(100);
+                break;
+            case 2: //Medium Asteroid
+                spawner.addScore(500);
+                break;
+            case 1: //Small Asteroid
+                spawner.addScore(1000);
+            default:
+                    break;
+        }
         if(size-1 == 0) {
-            //hitbox.dispose();
             a.asteroids.remove(this);//Remove asteroid
             physics.destroyBody(body);
 

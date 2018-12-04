@@ -46,7 +46,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 
 
     Skin skin;
-    int gameScore = 0;
+    //int gameScore = 0; //Score is now in AsteroidSpawner
     int gameLives = 20;
     Table table;
     BitmapFont bitmapFont;
@@ -76,7 +76,7 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         table = new Table();
 
         bitmapFont = new BitmapFont();
-        score = new Label("   Score: " + gameScore, skin, "default");
+        score = new Label("   Score: " + 0, skin, "default");
         lives = new Label("   Lives: " + gameLives, skin, "default");
         scoreTitle = "Score: 0";
         livesTitle = "Lives: 3";
@@ -221,9 +221,9 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
         batch.begin();
         bitmapFont.draw(batch, scoreTitle, 100, 800);
         bitmapFont.draw(batch, livesTitle, 100, 750);
-        score.setText("  Score: " + gameScore);
+        score.setText("  Score: " + spawner.getScore());
         lives.setText("  Hits: " + gameLives);
-        gameScore++;
+        //gameScore++;
 
         playerSprite.draw(batch);
 
@@ -310,10 +310,10 @@ public class AsteroidGame  extends ApplicationAdapter implements Screen {
 //                System.out.println(", Fixture B: " + contact.getFixtureB().getBody().getUserData());
                 if (contact.getFixtureA().getBody().getUserData() == "ship" && contact.getFixtureB().getBody().getUserData() == "asteroid") {
                     System.out.println("ship Contact");
-                    scoreTitle = "Score: " + ++gameScore;
+                    //scoreTitle = "Score: " + ++gameScore;
                     livesTitle = "Lives: " + --gameLives;
                     if (gameLives <= 0) {
-                        gameOverStae.setScreen(new GameOver(gameOverStae, gameScore));
+                        gameOverStae.setScreen(new GameOver(gameOverStae, spawner.getScore()));
 
                     }
 
